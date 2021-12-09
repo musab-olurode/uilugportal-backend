@@ -25,7 +25,7 @@ import cors from 'cors';
 config();
 
 // connect to database
-ConnectDB();
+// ConnectDB();
 
 const app: Application = express();
 
@@ -44,7 +44,7 @@ import apiRoutes from './routes/api/index';
 
 //development mode middle ware logger
 if (process.env.NODE_ENV === 'development') {
-	app.use(morgan('dev'));
+  app.use(morgan('dev'));
 }
 
 // sanitize data sql or mongo injection
@@ -58,8 +58,8 @@ app.use(xss());
 
 // api request rate limiting default : 100 requests in 10minutes
 const limiter = rateLimit({
-	windowMs: 10 * 60 * 1000, // 10 mins
-	max: 100,
+  windowMs: 10 * 60 * 1000, // 10 mins
+  max: 100,
 });
 app.use(limiter);
 
@@ -78,9 +78,9 @@ app.use(express.static(path.join(__dirname, 'storage')));
 
 // Handle 404 Requests
 app.use('*', (req, res, next) => {
-	const error = new Error('Route Not found');
-	(error as any).status = 404;
-	next(error);
+  const error = new Error('Route Not found');
+  (error as any).status = 404;
+  next(error);
 });
 
 // error handler

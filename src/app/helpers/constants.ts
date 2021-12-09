@@ -1,3 +1,5 @@
+import { obj } from '../../interfaces/obj';
+
 const enum UserType {
 	Admin = 'Admin',
 	User = 'User',
@@ -49,6 +51,15 @@ const numberWithCommas = (number: string) => {
 
 const numberWithNaira = (value: string) => '₦' + numberWithCommas(value);
 
+const gradePoints: obj<number> = {
+	A: 5,
+	B: 4,
+	C: 3,
+	D: 2,
+	E: 1,
+	F: 0,
+};
+
 export {
 	UserType,
 	UtilityBill,
@@ -58,4 +69,5 @@ export {
 	generateString,
 	numberWithCommas,
 	numberWithNaira,
+	gradePoints,
 };

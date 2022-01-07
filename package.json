@@ -1,7 +1,7 @@
 {
-	"name": "nodejs-typescript-starter-template",
-	"version": "0.0.1",
-	"description": "Nodejs typescript starter template",
+	"name": "uilugportal-backend",
+	"version": "1.0",
+	"description": "Web scrapper server for the UILUGPORTAL Enhanced project",
 	"main": "dist/server.js",
 	"typings": "src/@types/*.d.ts",
 	"repository": "https://github.com/musab-olurode/nodejs-starter-template.git",

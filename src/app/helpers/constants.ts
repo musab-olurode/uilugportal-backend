@@ -1,21 +1,5 @@
 import { obj } from '../../interfaces/obj';
 
-const enum UserType {
-	Admin = 'Admin',
-	User = 'User',
-}
-
-const enum UtilityBill {
-	Nepa = 'Nepa',
-	Water = 'Water',
-}
-
-const enum EmploymentStatus {
-	Employed = 'Employed',
-	SelfEmployed = 'SelfEmployed',
-	Unemployed = 'Unemployed',
-}
-
 const formatPhone = (phone: string) => {
 	return phone.startsWith('+234') ? phone : '+234' + phone.substring(1);
 };
@@ -60,14 +44,29 @@ const gradePoints: obj<number> = {
 	F: 0,
 };
 
+const getSessions = () => {
+	let sessionYears: string[] = [];
+	let thisYear = new Date().getFullYear();
+	for (let year = thisYear; year >= 2009; year--) {
+		let session = `${year - 1}/${year}`;
+		sessionYears.push(session.trim());
+	}
+	return sessionYears;
+};
+
+const getSessionsAsString = () => {
+	const sessionsAsArray = getSessions();
+	const sessionsAsString = sessionsAsArray.join(',');
+	return sessionsAsString;
+};
+
 export {
-	UserType,
-	UtilityBill,
-	EmploymentStatus,
 	formatPhone,
 	unformatPhone,
 	generateString,
 	numberWithCommas,
 	numberWithNaira,
 	gradePoints,
+	getSessions,
+	getSessionsAsString,
 };

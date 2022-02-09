@@ -6,313 +6,268 @@ import EmailVerificationToken from '../models/EmailVerificationToken';
 import { errorResponse, successResponse } from '../helpers/response';
 //models
 import User from '../models/User';
-import Admin from '../models/Admin';
-import { UserType } from '../helpers/constants';
-import moment from 'moment';
 import { NextFunction, Request, Response } from 'express';
 import { UserDoc } from '../../interfaces/UserDoc';
-import { obj } from '../../interfaces/obj';
-import cheerio from 'cheerio';
-import {
-  getDashboardPage,
-  getLoggedInUser,
-  loginToPortal,
-  logoutFromPortal,
-} from '../services/httpHandler';
+import { getDashboardPage, getLoggedInUser, loginToPortal, logoutFromPortal } from '../services/httpHandler';
 import { getSignedJwtToken } from '../services/tokenHandler';
 import { scrapIdTokens } from '../services/scrapperService';
 import { IIdTokens } from '../../interfaces/IdTokens';
 import { IUserProfile } from '../../interfaces/UserProfile';
 
 // eslint-disable-next-line no-unused-vars
-export const signup = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    await req.validate({
-      email: 'required|string|email',
-      password: 'required|string',
-    });
+export const signup = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	await req.validate({
+		email: 'required|string|email',
+		password: 'required|string',
+	});
 
-    const { email, password } = req.body;
+	const { email, password } = req.body;
 
-    const user = await User.create({ email, password });
+	const user = await User.create({ email, password });
 
-    // sendTokenResponse(res, user, 201);
-  }
-);
+	// sendTokenResponse(res, user, 201);
+});
 
-export const signin = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    await req.validate({
-      username: 'required|string',
-      password: 'required|string',
-    });
+export const signin = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	await req.validate({
+		username: 'required|string',
+		password: 'required|string',
+	});
 
-    const { username, password } = req.body;
+	const { username, password } = req.body;
 
-    const loginResponse = await loginToPortal({ username, password });
+	const loginResponse = await loginToPortal({ username, password });
 
-    if (!loginResponse.success) {
-      return errorResponse(next, loginResponse.message, loginResponse.code);
-    }
+	if (!loginResponse.success) {
+		return errorResponse(next, loginResponse.message, loginResponse.code);
+	}
 
-    const dashboard = await getDashboardPage(loginResponse.sessionId as string);
-    const idTokens = scrapIdTokens(dashboard.page as string);
+	const dashboard = await getDashboardPage(loginResponse.sessionId as string);
+	const idTokens = scrapIdTokens(dashboard.page as string);
 
-    const profileResponse = await getLoggedInUser(
-      loginResponse.sessionId as string,
-      idTokens
-    );
+	const profileResponse = await getLoggedInUser(loginResponse.sessionId as string, idTokens);
 
-    if (!profileResponse.success) {
-      return errorResponse(next, profileResponse.message, profileResponse.code);
-    }
+	if (!profileResponse.success) {
+		return errorResponse(next, profileResponse.message, profileResponse.code);
+	}
 
-    return sendTokenResponse(
-      res,
-      loginResponse.sessionId as string,
-      idTokens,
-      profileResponse.userProfile as IUserProfile,
-      loginResponse.code,
-      loginResponse.message
-    );
-  }
-);
-
-// eslint-disable-next-line no-unused-vars
-export const signout = asyncHandler(async (req: Request, res: Response) => {
-  const response = await logoutFromPortal(req.sessionId as string);
-
-  successResponse(res, response.message, {});
+	return sendTokenResponse(
+		res,
+		loginResponse.sessionId as string,
+		idTokens,
+		profileResponse.userProfile as IUserProfile,
+		loginResponse.code,
+		loginResponse.message
+	);
 });
 
 // eslint-disable-next-line no-unused-vars
-export const getAuthUser = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const response = await getLoggedInUser(
-      req.sessionId as string,
-      req.idTokens as IIdTokens
-    );
+export const signout = asyncHandler(async (req: Request, res: Response) => {
+	const response = await logoutFromPortal(req.sessionId as string);
 
-    if (!response.success) {
-      return errorResponse(next, response.message, response.code);
-    }
-
-    successResponse(res, 'data retrieved', { user: response.userProfile });
-  }
-);
+	successResponse(res, response.message, {});
+});
 
 // eslint-disable-next-line no-unused-vars
-export const updateDetails = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    await req.validate({
-      email: 'required|string|email',
-      username: 'required|string',
-    });
+export const getAuthUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	const response = await getLoggedInUser(req.sessionId as string, req.idTokens as IIdTokens);
 
-    const fieldsToUpdate = {
-      name: req.body.name,
-      email: req.body.email,
-    };
+	if (!response.success) {
+		return errorResponse(next, response.message, response.code);
+	}
 
-    const user = await User.findByIdAndUpdate(req.sessionId, fieldsToUpdate, {
-      new: true,
-      runValidators: true,
-    });
+	successResponse(res, 'data retrieved', { user: response.userProfile });
+});
 
-    successResponse(res, '', { user });
-  }
-);
+// eslint-disable-next-line no-unused-vars
+export const updateDetails = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	await req.validate({
+		email: 'required|string|email',
+		username: 'required|string',
+	});
 
-export const updatePassword = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    await req.validate({
-      currentPassword: 'required|string|min:6',
-      newPassword: 'required|string|min:6|confirmed',
-    });
+	const fieldsToUpdate = {
+		name: req.body.name,
+		email: req.body.email,
+	};
 
-    const user = await User.findById(req.sessionId).select('+password');
+	const user = await User.findByIdAndUpdate(req.sessionId, fieldsToUpdate, {
+		new: true,
+		runValidators: true,
+	});
 
-    // Check current password
-    if (!(await user.matchPassword(req.body.currentPassword))) {
-      return errorResponse(next, 'Password is incorrect', 401);
-    }
+	successResponse(res, '', { user });
+});
 
-    user.password = req.body.newPassword;
-    await user.save();
+export const updatePassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	await req.validate({
+		currentPassword: 'required|string|min:6',
+		newPassword: 'required|string|min:6|confirmed',
+	});
 
-    // sendTokenResponse(res, user);
-  }
-);
+	const user = await User.findById(req.sessionId).select('+password');
 
-export const forgotPassword = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    await req.validate({
-      email: 'required|email',
-    });
+	// Check current password
+	if (!(await user.matchPassword(req.body.currentPassword))) {
+		return errorResponse(next, 'Password is incorrect', 401);
+	}
 
-    const user: UserDoc = await User.findOne({ email: req.body.email });
+	user.password = req.body.newPassword;
+	await user.save();
 
-    if (!user) {
-      return errorResponse(next, 'There is no user with that email', 404);
-    }
+	// sendTokenResponse(res, user);
+});
 
-    // Get reset token
-    const resetCode = user.getResetPasswordCode();
+export const forgotPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	await req.validate({
+		email: 'required|email',
+	});
 
-    await user.save({ validateBeforeSave: false });
+	const user: UserDoc = await User.findOne({ email: req.body.email });
 
-    const message = `Your password reset code is ${resetCode}.`;
+	if (!user) {
+		return errorResponse(next, 'There is no user with that email', 404);
+	}
 
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Password reset code',
-        message,
-      });
+	// Get reset token
+	const resetCode = user.getResetPasswordCode();
 
-      successResponse(res, '', { success: true, data: 'Email sent' });
-    } catch (err) {
-      user.resetPasswordCode = undefined;
-      user.resetPasswordExpire = undefined;
+	await user.save({ validateBeforeSave: false });
 
-      await user.save({ validateBeforeSave: false });
+	const message = `Your password reset code is ${resetCode}.`;
 
-      return errorResponse(next, 'Email could not be sent', 500);
-    }
+	try {
+		await sendEmail({
+			email: user.email,
+			subject: 'Password reset code',
+			message,
+		});
 
-    successResponse(res, 'password reset code sent successfully', {});
-  }
-);
+		successResponse(res, '', { success: true, data: 'Email sent' });
+	} catch (err) {
+		user.resetPasswordCode = undefined;
+		user.resetPasswordExpire = undefined;
 
-export const resetPassword = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    await req.validate({
-      password: 'required|string|confirmed',
-      resetCode: 'required|string',
-    });
+		await user.save({ validateBeforeSave: false });
 
-    // Get hashed code
-    const resetPasswordCode = createHash('sha256')
-      .update(req.body.resetCode)
-      .digest('hex');
+		return errorResponse(next, 'Email could not be sent', 500);
+	}
 
-    const user = await User.findOne({
-      resetPasswordCode,
-      resetPasswordExpire: { $gt: Date.now() },
-    });
+	successResponse(res, 'password reset code sent successfully', {});
+});
 
-    if (!user) {
-      return errorResponse(next, 'Invalid token or code', 400);
-    }
+export const resetPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	await req.validate({
+		password: 'required|string|confirmed',
+		resetCode: 'required|string',
+	});
 
-    // Set new password
-    user.password = req.body.password;
-    user.resetPasswordCode = undefined;
-    user.resetPasswordExpire = undefined;
-    await user.save();
+	// Get hashed code
+	const resetPasswordCode = createHash('sha256').update(req.body.resetCode).digest('hex');
 
-    // sendTokenResponse(res, user);
-  }
-);
+	const user = await User.findOne({
+		resetPasswordCode,
+		resetPasswordExpire: { $gt: Date.now() },
+	});
+
+	if (!user) {
+		return errorResponse(next, 'Invalid token or code', 400);
+	}
+
+	// Set new password
+	user.password = req.body.password;
+	user.resetPasswordCode = undefined;
+	user.resetPasswordExpire = undefined;
+	await user.save();
+
+	// sendTokenResponse(res, user);
+});
 
 export const getEmailVerificationToken = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const user = await User.findById(req.sessionId);
+	async (req: Request, res: Response, next: NextFunction) => {
+		const user = await User.findById(req.sessionId);
 
-    if (user.verified) {
-      return errorResponse(next, 'User verified already', 400);
-    }
+		if (user.verified) {
+			return errorResponse(next, 'User verified already', 400);
+		}
 
-    const token = await EmailVerificationToken.findOne({ user: user._id });
+		const token = await EmailVerificationToken.findOne({ user: user._id });
 
-    const newToken = token.getVerificationToken();
+		const newToken = token.getVerificationToken();
 
-    await token.save();
+		await token.save();
 
-    const message = `Verify your email using the following link \n 
+		const message = `Verify your email using the following link \n 
                      ${process.env.FRONTEND_URL}/verify-email/${newToken}`;
 
-    await sendEmail({
-      email: user.email,
-      subject: `Email Confirmation, ${process.env.APP_NAME}`,
-      message,
-    });
+		await sendEmail({
+			email: user.email,
+			subject: `Email Confirmation, ${process.env.APP_NAME}`,
+			message,
+		});
 
-    successResponse(
-      res,
-      'Email verification sent, check your email inbox',
-      {},
-      200
-    );
-  }
+		successResponse(res, 'Email verification sent, check your email inbox', {}, 200);
+	}
 );
 
-export const verifyEmail = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    req.validate({
-      token: 'required|string',
-    });
-    const emailToken = req.params.token;
+export const verifyEmail = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	req.validate({
+		token: 'required|string',
+	});
+	const emailToken = req.params.token;
 
-    // Get hashed token
-    const verificationToken = createHash('sha256')
-      .update(emailToken)
-      .digest('hex');
+	// Get hashed token
+	const verificationToken = createHash('sha256').update(emailToken).digest('hex');
 
-    const token = await EmailVerificationToken.findOne({
-      token: verificationToken,
-      expires: { $gt: Date.now() },
-    });
+	const token = await EmailVerificationToken.findOne({
+		token: verificationToken,
+		expires: { $gt: Date.now() },
+	});
 
-    if (!token) {
-      return errorResponse(next, 'Invalid token', 400);
-    }
+	if (!token) {
+		return errorResponse(next, 'Invalid token', 400);
+	}
 
-    // update user verification status
-    const user = await User.findById(token.user);
+	// update user verification status
+	const user = await User.findById(token.user);
 
-    user.verified = true;
+	user.verified = true;
 
-    await user.save();
+	await user.save();
 
-    // remove token from document
-    token.token = undefined;
-    token.expires = undefined;
+	// remove token from document
+	token.token = undefined;
+	token.expires = undefined;
 
-    await token.save();
+	await token.save();
 
-    successResponse(res, 'Email verification is successful', {}, 200);
-  }
-);
+	successResponse(res, 'Email verification is successful', {}, 200);
+});
 
 // Create token, add cookie and send response
 const sendTokenResponse = (
-  res: Response,
-  sessionId: string,
-  idTokens: IIdTokens,
-  userProfile: IUserProfile,
-  statusCode: number = 200,
-  message?: string
+	res: Response,
+	sessionId: string,
+	idTokens: IIdTokens,
+	userProfile: IUserProfile,
+	statusCode: number = 200,
+	message?: string
 ) => {
-  const token = getSignedJwtToken(sessionId, idTokens);
+	const token = getSignedJwtToken(sessionId, idTokens);
 
-  const options = {
-    expires: new Date(
-      Date.now() +
-        (process.env.JWT_COOKIE_EXPIRE as unknown as number) * 60 * 1000
-    ),
-    httpOnly: true,
-    secure: false,
-  };
+	const options = {
+		expires: new Date(Date.now() + (process.env.JWT_COOKIE_EXPIRE as unknown as number) * 60 * 1000),
+		httpOnly: true,
+		secure: false,
+	};
 
-  res
-    .status(statusCode)
-    .cookie('token', token, options)
-    .cookie('PHPSESSID', sessionId, options)
-    .json({
-      success: true,
-      message,
-      data: { user: userProfile },
-      token,
-    });
+	res.status(statusCode)
+		.cookie('token', token, options)
+		.cookie('PHPSESSID', sessionId, options)
+		.json({
+			success: true,
+			message,
+			data: { user: userProfile },
+			token,
+		});
 };

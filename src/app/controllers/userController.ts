@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import { IIdTokens } from '../../interfaces/IdTokens';
 import { IResult } from '../../interfaces/Result';
-import { gradePoints } from '../helpers/constants';
+import { getSessionsAsString, gradePoints } from '../helpers/constants';
 import { errorResponse, successResponse } from '../helpers/response';
 import asyncHandler from '../middlewares/async';
 import { getPrintables, getResults } from '../services/httpHandler';
 
 // eslint-disable-next-line no-unused-vars
 export const getResult = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	const sessionsAsString = getSessionsAsString();
 	await req.validate({
-		session:
-			'required|string|in:2020/2021,2019/2020,2018/2019,2017/2018,2016/2017,2015/2016,2014/2015,2013/2014,2012/2013,2011/2012,2010/2011,2009/2010,2008/2009',
+		session: 'required|string|in:' + sessionsAsString,
 	});
 
 	const { session } = req.query;
@@ -82,9 +82,9 @@ export const calculateCGPA = asyncHandler(
 export const getAllPrintables = asyncHandler(
 	// eslint-disable-next-line no-unused-vars
 	async (req: Request, res: Response, next: NextFunction) => {
+		const sessionsAsString = getSessionsAsString();
 		await req.validate({
-			session:
-				'required|string|in:2020/2021,2019/2020,2018/2019,2017/2018,2016/2017,2015/2016,2014/2015,2013/2014,2012/2013,2011/2012,2010/2011,2009/2010,2008/2009',
+			session: 'required|string|in:' + sessionsAsString,
 			currentLevel: 'required|string|in:100,200,300,400,500',
 			levelForCourseForm: 'required|string|in:100,200,300,400,500',
 			matricNumber: 'required|string',

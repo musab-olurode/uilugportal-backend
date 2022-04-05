@@ -1,11 +1,11 @@
-# Companion server for the UILUG PORTAL ENHANCED project
+# Companion server for the UILUG PORTAL project
 
 More details can be found [here](https://github.com/musab-olurode/uilugportal-frontend)
 
 ## Dependencies
 
--   [Node.js 14.17.5 or later](https://nodejs.org/en/)
--   [Typescript 4.5.2 or later](https://www.typescriptlang.org/)
+- [Node.js 14.17.5 or later](https://nodejs.org/en/)
+- [Typescript 4.5.2 or later](https://www.typescriptlang.org/)
 
 ## Installation/Getting Started
 
@@ -15,7 +15,7 @@ First, clone the project:
 git clone https://github.com/musab-olurode/uilugportal-backend.git
 ```
 
-CD into the project direcetory:
+CD into the project directory:
 
 ```bash
 cd uilugportal-backend
@@ -37,7 +37,11 @@ npm run dev
 yarn dev
 ```
 
-Server now runs on [http://localhost:5000](http://localhost:3000).
+Server now runs on [http://localhost:5000](http://localhost:5000).
+
+Live version [here (https://uilugportal-backend.herokuapp.com/v1)](https://uilugportal-backend.herokuapp.com/v1)
+
+API Docs [here](https://documenter.getpostman.com/view/11436363/UVyuSv5r)
 
 <!-- ## Tests
 
@@ -63,7 +67,7 @@ General instructions on _how_ to contribute can be found [here](CONTRIBUTING.md)
 
 Copyright 2021 Olurode Mus'ab
 
--   [LICENSE](LICENSE)
+- [LICENSE](LICENSE)
 
 ---
 

@@ -1,19 +1,21 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true,
-        "node": true,
+	"env": {
+		"browser": true,
+		"es2021": true,
+		"node": true,
 		"jest": true
-    },
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaVersion": 13,
-        "sourceType": "module"
-    },
-    "plugins": [
-        "@typescript-eslint"
-    ],
+	},
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": 13,
+		"sourceType": "module"
+	},
+	"extends": ["prettier"],
+	"plugins": ["@typescript-eslint", "prettier"],
 	"rules": {
+		"prettier/prettier": ["error"],
+		"arrow-body-style": "off",
+		"prefer-arrow-callback": "off",
 		"constructor-super": 2,
 		"for-direction": 2,
 		"getter-return": 2,
@@ -70,7 +72,6 @@
 		"no-with": 2,
 		"require-yield": 2,
 		"use-isnan": 2,
-		"valid-typeof": 2,
-		"quotes": ["warn", "single"]
+		"valid-typeof": 2
 	}
 }

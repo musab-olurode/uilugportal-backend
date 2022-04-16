@@ -4,11 +4,19 @@ import QueryString from 'qs';
 import cheerio from 'cheerio';
 import IPortalResponse from '../../interfaces/PortalResponse';
 import { IIdTokens } from '../../interfaces/IdTokens';
-import { scrapPaymentReceipts, scrapResults, scrapUserProfile } from './scrapperService';
+import {
+	scrapPaymentReceipts,
+	scrapResults,
+	scrapUserProfile,
+} from './scrapper';
 
 const portalUrl = 'https://uilugportal.unilorin.edu.ng';
 
-const handleAuthRequest = async (url: string, payload: obj, headers?: AxiosRequestHeaders) => {
+const handleAuthRequest = async (
+	url: string,
+	payload: obj,
+	headers?: AxiosRequestHeaders
+) => {
 	let response: IPortalResponse = {
 		success: false,
 		message: 'Oops! Something went wrong',
@@ -22,7 +30,10 @@ const handleAuthRequest = async (url: string, payload: obj, headers?: AxiosReque
 			if ($('font').text() === 'Invalid login parameters') {
 				response.message = 'Invalid username or password';
 				response.code = 401;
-			} else if ($('font').text() === 'You can not have multiple sessions for your profile.') {
+			} else if (
+				$('font').text() ===
+				'You can not have multiple sessions for your profile.'
+			) {
 				response.message = $('font').text();
 				response.code = 403;
 			} else if (
@@ -201,7 +212,10 @@ const getLoggedInUser = async (sessionId: string, idTokens: IIdTokens) => {
 		return response;
 	}
 
-	response.userProfile = scrapUserProfile(dashboard.page as string, profile.page as string);
+	response.userProfile = scrapUserProfile(
+		dashboard.page as string,
+		profile.page as string
+	);
 	return response;
 };
 
@@ -224,9 +238,13 @@ const getResults = async (sessionId: string, payload: obj) => {
 		response.code = resultPageUrl.code;
 		return response;
 	}
-	const resultsPage = await handlePageRequest(resultPageUrl.url as string, 'Results', {
-		cookie: `PHPSESSID=${sessionId}`,
-	});
+	const resultsPage = await handlePageRequest(
+		resultPageUrl.url as string,
+		'Results',
+		{
+			cookie: `PHPSESSID=${sessionId}`,
+		}
+	);
 	if (!resultsPage.success) {
 		response.success = false;
 		response.message = resultsPage.message;
@@ -268,9 +286,13 @@ const getPrintables = async (
 
 	for (let i = 0; i < paymentReceipts.length; i++) {
 		let receipt = paymentReceipts[i];
-		let receiptAsPage = await handlePageRequest(receipt.href, 'PAYMENT RECEIPTS', {
-			cookie: `PHPSESSID=${sessionId}`,
-		});
+		let receiptAsPage = await handlePageRequest(
+			receipt.href,
+			'PAYMENT RECEIPTS',
+			{
+				cookie: `PHPSESSID=${sessionId}`,
+			}
+		);
 		if (!receiptAsPage.success) {
 			response.success = false;
 			response.message = receiptAsPage.message;
@@ -322,9 +344,13 @@ const getPrintables = async (
 		return response;
 	}
 
-	const resultsPage = await handlePageRequest(resultPageUrl.url as string, 'Results', {
-		cookie: `PHPSESSID=${sessionId}`,
-	});
+	const resultsPage = await handlePageRequest(
+		resultPageUrl.url as string,
+		'Results',
+		{
+			cookie: `PHPSESSID=${sessionId}`,
+		}
+	);
 	if (!resultsPage.success) {
 		response.success = false;
 		response.message = resultsPage.message;
@@ -349,4 +375,11 @@ const getPrintables = async (
 	return response;
 };
 
-export { loginToPortal, logoutFromPortal, getDashboardPage, getLoggedInUser, getResults, getPrintables };
+export {
+	loginToPortal,
+	logoutFromPortal,
+	getDashboardPage,
+	getLoggedInUser,
+	getResults,
+	getPrintables,
+};

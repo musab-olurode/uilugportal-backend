@@ -10,7 +10,7 @@ import { NextFunction, Request, Response } from 'express';
 import { UserDoc } from '../../interfaces/UserDoc';
 import { getDashboardPage, getLoggedInUser, loginToPortal, logoutFromPortal } from '../services/httpHandler';
 import { getSignedJwtToken } from '../services/tokenHandler';
-import { scrapIdTokens } from '../services/scrapperService';
+import { scrapIdTokens } from '../services/scrapper';
 import { IIdTokens } from '../../interfaces/IdTokens';
 import { IUserProfile } from '../../interfaces/UserProfile';
 

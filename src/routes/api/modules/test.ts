@@ -1,5 +1,5 @@
 import express from 'express';
-import { testFunction } from '../../../app/controllers/testController';
+import { testFunction } from '../../../app/controllers/test';
 
 const router = express.Router();
 

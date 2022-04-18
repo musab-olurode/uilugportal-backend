@@ -1,4 +1,14 @@
 {
 	"typescript.tsdk": "node_modules\\typescript\\lib",
-	"cSpell.words": ["UILUG", "unilorin"]
+	"cSpell.words": [
+		"contentvar",
+		"PHPSESSID",
+		"printables",
+		"regno",
+		"rtype",
+		"scriptfile",
+		"UILUG",
+		"uilugportal",
+		"unilorin"
+	]
 }

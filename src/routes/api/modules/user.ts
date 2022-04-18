@@ -1,9 +1,9 @@
 import express from 'express';
 import {
-  calculateCGPA,
-  getAllPrintables,
-  getResult,
-} from '../../../app/controllers/userController';
+	calculateCGPA,
+	getAllPrintables,
+	getResult,
+} from '../../../app/controllers/user';
 import { protect } from '../../../app/middlewares/auth';
 
 const router = express.Router();

@@ -1,13 +1,5 @@
 import { obj } from '../../interfaces/obj';
 
-const formatPhone = (phone: string) => {
-	return phone.startsWith('+234') ? phone : '+234' + phone.substring(1);
-};
-
-const unformatPhone = (phone: string) => {
-	return phone.startsWith('+234') ? '0' + phone.substring(4) : phone;
-};
-
 const generateString = (
 	length: number,
 	useAlphabeticCharacters: boolean = true,
@@ -54,6 +46,16 @@ const getSessions = () => {
 	return sessionYears;
 };
 
+const normalizeName = (name: string) =>
+	name
+		.replace(',', '')
+		.split(' ')
+		.map(
+			(nameSlice) =>
+				nameSlice.charAt(0).toUpperCase() + nameSlice.slice(1).toLowerCase()
+		)
+		.join(' ');
+
 const getSessionsAsString = () => {
 	const sessionsAsArray = getSessions();
 	const sessionsAsString = sessionsAsArray.join(',');
@@ -61,12 +63,11 @@ const getSessionsAsString = () => {
 };
 
 export {
-	formatPhone,
-	unformatPhone,
 	generateString,
 	numberWithCommas,
 	numberWithNaira,
 	gradePoints,
 	getSessions,
 	getSessionsAsString,
+	normalizeName,
 };

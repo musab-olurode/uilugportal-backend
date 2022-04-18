@@ -1,5 +1,5 @@
 import cheerio from 'cheerio';
-import { portalUrl } from '../../configs';
+import { unilorinPortalUrl } from '../../configs';
 import {
 	AuthFailureError,
 	ForbiddenError,
@@ -13,8 +13,6 @@ import { IUserProfile } from '../../interfaces/UserProfile';
 import { normalizeName } from '../helpers/constants';
 import { PageTitle, RequestMethod } from '../helpers/enums';
 import ApiService from './api';
-
-const unilorinPortalUrl = process.env.UNILORIN_PORTAL_URL;
 
 class ScrapperService {
 	private static handleFallback(
@@ -368,9 +366,9 @@ class ScrapperService {
 			);
 
 			receipt.href = receiptAsPage
-				.replace(/href="/g, `href="${portalUrl}/`)
-				.replace(/src="(?!https)/g, `src="${portalUrl}/`)
-				.replace(/src='(?!https)/g, `src='${portalUrl}/`);
+				.replace(/href="/g, `href="${unilorinPortalUrl}/`)
+				.replace(/src="(?!https)/g, `src="${unilorinPortalUrl}/`)
+				.replace(/src='(?!https)/g, `src='${unilorinPortalUrl}/`);
 			paymentReceiptsWithPages.push(receipt);
 		}
 
@@ -398,13 +396,13 @@ class ScrapperService {
 		const printables = {
 			paymentReceiptsWithPages,
 			courseFormPage: courseFormPage
-				.replace(/href="/g, `href="${portalUrl}/`)
-				.replace(/src="(?!https)/g, `src="${portalUrl}/`)
-				.replace(/src='(?!https)/g, `src='${portalUrl}/`),
+				.replace(/href="/g, `href="${unilorinPortalUrl}/`)
+				.replace(/src="(?!https)/g, `src="${unilorinPortalUrl}/`)
+				.replace(/src='(?!https)/g, `src='${unilorinPortalUrl}/`),
 			resultsPage: resultsPage
-				.replace(/href="/g, `href="${portalUrl}/`)
-				.replace(/src="(?!https)/g, `src="${portalUrl}/`)
-				.replace(/src='(?!https)/g, `src='${portalUrl}/`),
+				.replace(/href="/g, `href="${unilorinPortalUrl}/`)
+				.replace(/src="(?!https)/g, `src="${unilorinPortalUrl}/`)
+				.replace(/src='(?!https)/g, `src='${unilorinPortalUrl}/`),
 		};
 
 		return printables;

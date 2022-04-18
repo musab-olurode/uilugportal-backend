@@ -5,4 +5,4 @@ export const databaseUrl = process.env.DATABASE_URL;
 export const jwtSecret = process.env.JWT_SECRET;
 export const jwtExpire = process.env.JWT_EXPIRE;
 export const jwtCookieExpire = process.env.JWT_COOKIE_EXPIRE;
-export const portalUrl = process.env.UNILORIN_PORTAL_URL;
+export const unilorinPortalUrl = process.env.UNILORIN_PORTAL_URL;

@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, AxiosRequestHeaders } from 'axios';
 import { obj } from '../../interfaces/obj';
 import QueryString from 'qs';
-import { portalUrl } from '../../configs';
+import { unilorinPortalUrl } from '../../configs';
 import { RequestMethod } from '../helpers/enums';
 import { InternalError } from '../../core/ApiError';
 
@@ -32,7 +32,7 @@ class ApiService {
 
 		try {
 			portalResponse = await this.request(
-				`${portalUrl}/${url}`,
+				`${unilorinPortalUrl}/${url}`,
 				method,
 				headers,
 				payload && QueryString.stringify(payload)

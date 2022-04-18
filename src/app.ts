@@ -4,9 +4,10 @@ import path from 'path';
 import express, { Application } from 'express';
 import morgan from 'morgan';
 import ErrorHandler from './app/middlewares/errorHandler';
-import ConnectDB from './configs/database';
+// import ConnectDB from './configs/database';
 import cookieParser from 'cookie-parser';
 import fileupload from 'express-fileupload';
+import { NotFoundError } from './core/ApiError';
 
 // securing api packages
 
@@ -42,9 +43,9 @@ app.use(fileupload());
 import apiRoutes from './routes/api/index';
 // import webRoutes from './routes/web/index';
 
-//development mode middle ware logger
+//development mode middleware logger
 if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
+	app.use(morgan('dev'));
 }
 
 // sanitize data sql or mongo injection
@@ -58,8 +59,8 @@ app.use(xss());
 
 // api request rate limiting default : 100 requests in 10minutes
 const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 mins
-  max: 100,
+	windowMs: 10 * 60 * 1000, // 10 mins
+	max: 100,
 });
 app.use(limiter);
 
@@ -77,11 +78,7 @@ app.use('/v1/', apiRoutes);
 app.use(express.static(path.join(__dirname, 'storage')));
 
 // Handle 404 Requests
-app.use('*', (req, res, next) => {
-  const error = new Error('Route Not found');
-  (error as any).status = 404;
-  next(error);
-});
+app.use('*', (req, res, next) => next(new NotFoundError()));
 
 // error handler
 app.use(ErrorHandler);

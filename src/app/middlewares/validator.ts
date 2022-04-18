@@ -1,9 +1,9 @@
 import Validator, { ErrorMessages, Errors, Rules } from 'validatorjs';
-import { errorResponse } from '../helpers/response';
 import mongoose from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
 import { obj } from '../../interfaces/obj';
 import { ValidationLocation } from '../../interfaces/ValidationLocation';
+import { BadRequestResponse } from '../../core/ApiResponse';
 
 const registerCustomRules = () => {
 	Validator.registerAsync(
@@ -19,7 +19,8 @@ const registerCustomRules = () => {
 			}
 			const modelName = requirements[0];
 			const modelField = requirements[1];
-			const formattedModelName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
+			const formattedModelName =
+				modelName.charAt(0).toUpperCase() + modelName.slice(1);
 			const Model = mongoose.connection.model(formattedModelName);
 			const foundModel = await Model.findOne({ [modelField]: value });
 			if (!foundModel) {
@@ -42,7 +43,8 @@ const registerCustomRules = () => {
 			}
 			const modelName = requirements[0];
 			const modelField = requirements[1];
-			const formattedModelName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
+			const formattedModelName =
+				modelName.charAt(0).toUpperCase() + modelName.slice(1);
 			const Model = mongoose.connection.model(formattedModelName);
 			const foundModel = await Model.findOne({ [modelField]: value });
 			if (foundModel) {
@@ -59,8 +61,13 @@ const registerCustomRules = () => {
 			if (!(value as any).isFile) {
 				return passes(false, `The ${attribute} is not a file.`);
 			}
-			if ((value as any).size > (process.env.MAX_FILE_UPLOAD as unknown as number)) {
-				return passes(false, `The ${attribute} file size exceeds ${process.env.MAX_FILE_UPLOAD}.`);
+			if (
+				(value as any).size > (process.env.MAX_FILE_UPLOAD as unknown as number)
+			) {
+				return passes(
+					false,
+					`The ${attribute} file size exceeds ${process.env.MAX_FILE_UPLOAD}.`
+				);
 			}
 			return passes();
 		},
@@ -72,7 +79,10 @@ const registerCustomRules = () => {
 			if (!requirement) {
 				return passes(false, 'Mime type requirements are expected.');
 			}
-			if (!(value as any).mimetype || !(value as any).mimetype.startsWith(requirement)) {
+			if (
+				!(value as any).mimetype ||
+				!(value as any).mimetype.startsWith(requirement)
+			) {
 				return passes(false, `The ${attribute} is not a(n) ${requirement}.`);
 			}
 			return passes();
@@ -83,7 +93,12 @@ const registerCustomRules = () => {
 
 registerCustomRules();
 
-const validator = async (data: any, rules: Rules, callback: Function, customMessages?: ErrorMessages) => {
+const validator = async (
+	data: any,
+	rules: Rules,
+	callback: Function,
+	customMessages?: ErrorMessages
+) => {
 	const validation = new Validator(data, rules, customMessages);
 	validation.passes(() => callback(null, true));
 	validation.fails(() => callback(validation.errors, false));
@@ -110,7 +125,9 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
 				rules,
 				(err: Errors, status: boolean) => {
 					if (!status) {
-						return errorResponse(next, convertValidationErrorsToString(err), 422);
+						return new BadRequestResponse(
+							convertValidationErrorsToString(err)
+						).send(res);
 					}
 					req.validated = () => getValidatedFields(rules, dataToValidate);
 					resolve();
@@ -123,7 +140,12 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getFieldsToValidate = (req: Request, locations: ValidationLocation[]) => {
-	const possibleFields: ValidationLocation[] = ['params', 'query', 'body', 'files'];
+	const possibleFields: ValidationLocation[] = [
+		'params',
+		'query',
+		'body',
+		'files',
+	];
 	let fields = {};
 	possibleFields.forEach((possibleField) => {
 		if (locations.length > 0 && locations.includes(possibleField)) {

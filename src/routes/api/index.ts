@@ -6,9 +6,9 @@ import fileHandler from '../../app/middlewares/fileHandler';
 import validate from '../../app/middlewares/validator';
 
 // add api routes below
-import authRouter from './modules/authRoute';
-import userRouter from './modules/userRoute';
-import testRouter from './modules/testRoute';
+import authRouter from './modules/auth';
+import userRouter from './modules/user';
+import testRouter from './modules/test';
 
 apiRoutes.use(advancedResults);
 apiRoutes.use(fileHandler);

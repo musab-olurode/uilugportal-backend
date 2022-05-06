@@ -5,6 +5,8 @@ import { NextFunction, Request, Response } from 'express';
 import { AuthFailureError, ForbiddenError } from '../../core/ApiError';
 import Jwt from '../../core/Jwt';
 import { jwtSecret } from '../../configs';
+import { UserDoc } from '../../interfaces/UserDoc';
+import User from '../models/User';
 
 // Protect routes
 const protect = asyncHandler(
@@ -32,6 +34,13 @@ const protect = asyncHandler(
 			if (!sessionId) {
 				throw new AuthFailureError('session id missing from token');
 			}
+			const user: UserDoc | undefined = await User.findById(
+				(decoded as any)._id
+			);
+			if (!user) {
+				throw new AuthFailureError('invalid user id');
+			}
+			req.user = user;
 			req.sessionId = sessionId;
 			req.idTokens = {
 				r_val: (decoded as any).r_val,

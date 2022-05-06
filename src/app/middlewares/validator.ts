@@ -61,12 +61,21 @@ const registerCustomRules = () => {
 			if (!(value as any).isFile) {
 				return passes(false, `The ${attribute} is not a file.`);
 			}
-			if (
-				(value as any).size > (process.env.MAX_FILE_UPLOAD as unknown as number)
-			) {
+			return passes();
+		},
+		'The :attribute is not a file.'
+	);
+	Validator.registerAsync(
+		'fileSize',
+		// eslint-disable-next-line no-unused-vars
+		(value, requirement, attribute, passes) => {
+			if (!requirement) {
+				return passes(false, 'A file size requirement is expected.');
+			}
+			if ((value as any).size / 1048576 > parseInt(requirement)) {
 				return passes(
 					false,
-					`The ${attribute} file size exceeds ${process.env.MAX_FILE_UPLOAD}.`
+					`The ${attribute} is larger than ${parseInt(requirement)}MB.`
 				);
 			}
 			return passes();
@@ -77,7 +86,7 @@ const registerCustomRules = () => {
 		'mime',
 		(value, requirement, attribute, passes) => {
 			if (!requirement) {
-				return passes(false, 'Mime type requirements are expected.');
+				return passes(false, 'A mime type requirement is expected.');
 			}
 			if (
 				!(value as any).mimetype ||

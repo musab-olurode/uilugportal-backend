@@ -2,21 +2,20 @@ import express from 'express';
 const apiRoutes = express.Router();
 
 import advancedResults from '../../app/middlewares/advancedResults';
+import { protect } from '../../app/middlewares/auth';
 import fileHandler from '../../app/middlewares/fileHandler';
 import validate from '../../app/middlewares/validator';
 
 // add api routes below
 import authRouter from './modules/auth';
-import userRouter from './modules/user';
-import testRouter from './modules/test';
+import guestRouter from './modules/guest';
 
 apiRoutes.use(advancedResults);
 apiRoutes.use(fileHandler);
 apiRoutes.use(validate);
 
 // initialize routes
-apiRoutes.use('/auth', authRouter);
-apiRoutes.use('/user', userRouter);
-apiRoutes.use('/', testRouter);
+apiRoutes.use('/', protect, authRouter);
+apiRoutes.use('/', guestRouter);
 
 export default apiRoutes;

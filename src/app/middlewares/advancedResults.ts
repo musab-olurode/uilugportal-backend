@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { Model } from 'mongoose';
+import { Model, PopulateOptions } from 'mongoose';
 import IPagination from '../../interfaces/Pagination';
 
 const advancedResults = (req: Request, res: Response, next: NextFunction) => {
-	res.advancedResults = async (model: Model<any>, populate?: string) => {
+	res.advancedResults = async (model: Model<any>, ...populate: any) => {
 		let query;
 
 		const reqQuery = { ...(req.query as any) };

@@ -4,7 +4,7 @@ import path from 'path';
 import express, { Application } from 'express';
 import morgan from 'morgan';
 import ErrorHandler from './app/middlewares/errorHandler';
-// import ConnectDB from './configs/database';
+import ConnectDB from './configs/database';
 import cookieParser from 'cookie-parser';
 import fileupload from 'express-fileupload';
 import { NotFoundError } from './core/ApiError';
@@ -26,7 +26,7 @@ import cors from 'cors';
 config();
 
 // connect to database
-// ConnectDB();
+ConnectDB();
 
 const app: Application = express();
 

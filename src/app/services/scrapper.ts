@@ -9,7 +9,7 @@ import { IIdTokens } from '../../interfaces/IdTokens';
 import { obj } from '../../interfaces/obj';
 import { IReceipt } from '../../interfaces/Receipt';
 import { IResult } from '../../interfaces/Result';
-import { IUserProfile } from '../../interfaces/UserProfile';
+import { IStudentProfile } from '../../interfaces/UserProfile';
 import { normalizeName } from '../helpers/constants';
 import { PageTitle, RequestMethod } from '../helpers/enums';
 import ApiService from './api';
@@ -153,7 +153,7 @@ class ScrapperService {
 			.toArray();
 		let semesterParts = semester[0].toString().split(' ');
 
-		let userProfile: IUserProfile = {
+		let userProfile: IStudentProfile = {
 			avatar: images[1].toString().trim(),
 			signature: images[2].toString().trim(),
 			matricNumber: profileData[2].toString().trim(),

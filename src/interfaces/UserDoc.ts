@@ -1,15 +1,10 @@
-import { Document, Types } from 'mongoose';
-import { AdminDoc } from './AdminDoc';
+import { Document } from 'mongoose';
 
 export interface UserDoc extends Document {
-	phone: string;
-	email: string;
+	matricNumber: string;
+	fullName: string;
 	avatar: string;
-	password: string;
-	resetPasswordCode?: string;
-	resetPasswordExpire?: number;
-	matchPassword: (pw: string) => Promise<boolean>;
-	validPassword: (pw: string) => Promise<boolean>;
-	getSignedJwtToken: () => Promise<string>;
-	getResetPasswordCode: () => string;
+	department: string;
+	faculty: string;
+	level: '100' | '200' | '300' | '400' | '500';
 }

@@ -10,4 +10,4 @@ const AdminSchema = new Schema<AdminDoc>(
 	{ timestamps: true }
 );
 
-export default model('Admin', AdminSchema);
+export default model<AdminDoc>('Admin', AdminSchema);

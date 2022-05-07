@@ -1,4 +1,8 @@
+import { Types } from 'mongoose';
 import { IIdTokens } from '../../interfaces/IdTokens';
+import { UserDoc } from '../../interfaces/UserDoc';
+import { IStudentProfile } from '../../interfaces/UserProfile';
+import User from '../models/User';
 import ScrapperService from './scrapper';
 
 class AuthService {
@@ -14,17 +18,64 @@ class AuthService {
 
 		const idTokens = await ScrapperService.getIdTokens(dashboardPage);
 
-		const user = await ScrapperService.getUserProfile(
+		const studentProfile = await ScrapperService.getUserProfile(
 			sessionId,
 			idTokens,
 			dashboardPage
 		);
 
+		const userProfile = await this.findOrCreateUser(studentProfile);
+
+		const user = { ...studentProfile, user: userProfile };
+
 		return { sessionId, idTokens, user };
 	}
 
-	public static async getLoggedInUser(sessionId: string, idTokens: IIdTokens) {
-		const user = await ScrapperService.getUserProfile(sessionId, idTokens);
+	private static async findOrCreateUser(studentProfile: IStudentProfile) {
+		let user = await User.findOne({
+			matricNumber: studentProfile.matricNumber,
+		});
+
+		if (user) {
+			if (user.faculty !== studentProfile.faculty) {
+				user.faculty = studentProfile.faculty;
+				await user.save();
+			}
+			if (user.department !== studentProfile.department) {
+				user.department = studentProfile.department;
+				await user.save();
+			}
+			if (user.level !== studentProfile.level) {
+				user.level = studentProfile.level;
+				await user.save();
+			}
+		} else {
+			user = await User.create({
+				matricNumber: studentProfile.matricNumber,
+				fullName: studentProfile.fullName,
+				avatar: studentProfile.avatar,
+				faculty: studentProfile.faculty,
+				department: studentProfile.department,
+				level: studentProfile.level,
+			});
+		}
+
+		return user as UserDoc;
+	}
+
+	public static async getLoggedInUser(
+		sessionId: string,
+		idTokens: IIdTokens,
+		userId: Types.ObjectId
+	) {
+		const studentProfile = await ScrapperService.getUserProfile(
+			sessionId,
+			idTokens
+		);
+
+		const userProfile = await User.findById(userId);
+
+		const user = { ...studentProfile, user: userProfile };
 
 		return user;
 	}

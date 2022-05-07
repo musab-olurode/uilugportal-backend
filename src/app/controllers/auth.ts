@@ -3,7 +3,6 @@ import asyncHandler from '../middlewares/async';
 import { Request, Response } from 'express';
 import Jwt from '../../core/Jwt';
 import { IIdTokens } from '../../interfaces/IdTokens';
-import { IUserProfile } from '../../interfaces/UserProfile';
 import { jwtCookieExpire } from '../../configs';
 import AuthService from '../services/auth';
 import { SuccessResponse } from '../../core/ApiResponse';
@@ -42,7 +41,8 @@ export const getLoggedInUser = asyncHandler(
 	async (req: Request, res: Response) => {
 		const user = await AuthService.getLoggedInUser(
 			req.sessionId as string,
-			req.idTokens as IIdTokens
+			req.idTokens as IIdTokens,
+			req.user!._id
 		);
 
 		return new SuccessResponse('data retrieved', { user }).send(res);
@@ -54,11 +54,11 @@ const sendTokenResponse = (
 	res: Response,
 	sessionId: string,
 	idTokens: IIdTokens,
-	user: IUserProfile,
+	user: any,
 	statusCode: number = 200,
 	message?: string
 ) => {
-	const token = Jwt.issue(sessionId, idTokens);
+	const token = Jwt.issue(sessionId, idTokens, user.user._id);
 
 	const options = {
 		expires: new Date(

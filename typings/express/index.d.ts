@@ -4,7 +4,7 @@ declare namespace Express {
 		user?: import('../../src/interfaces/UserDoc').UserDoc;
 		sessionId?: string;
 		idTokens?: import('../../src/interfaces/IdTokens').IIdTokens;
-		admin?: import('../../src/interfaces/UserDoc').UserDoc;
+		admin?: import('../../src/interfaces/AdminDoc').AdminDoc;
 		validate: (
 			args: import('validatorjs').Rules,
 			locations?: import('../../src/interfaces/ValidationLocation').ValidationLocation[],

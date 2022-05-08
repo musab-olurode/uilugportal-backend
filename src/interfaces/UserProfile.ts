@@ -7,7 +7,7 @@ export interface IStudentProfile {
 	faculty: string;
 	department: string;
 	course: string;
-	level: string;
+	level: '100' | '200' | '300' | '400' | '500';
 	gender: string;
 	address: string;
 	studentEmail: string;

@@ -1,5 +1,5 @@
 import cheerio from 'cheerio';
-import { unilorinPortalUrl } from '../../configs';
+import { teamPlatoUrl, unilorinPortalUrl, unilorinSuUrl } from '../../configs';
 import {
 	AuthFailureError,
 	ForbiddenError,
@@ -13,6 +13,8 @@ import { IStudentProfile } from '../../interfaces/UserProfile';
 import { normalizeName } from '../helpers/constants';
 import { PageTitle, RequestMethod } from '../helpers/enums';
 import ApiService from './api';
+import * as fs from 'fs';
+import * as path from 'path';
 
 class ScrapperService {
 	private static handleFallback(
@@ -162,7 +164,7 @@ class ScrapperService {
 			faculty: profileData[6].toString().trim(),
 			department: profileData[7].toString().trim(),
 			course: profileData[8].toString().trim(),
-			level: profileData[3].toString().trim(),
+			level: profileData[3].toString().trim() as IStudentProfile['level'],
 			gender: profileData[9].toString().trim(),
 			address: profileData[10].toString().trim(),
 			studentEmail: profileData[11].toString().trim(),
@@ -442,33 +444,126 @@ class ScrapperService {
 		return portalResponse.data as string;
 	}
 
-	public static test() {
-		const $ = cheerio.load(`
-		  `);
+	public static async getUnilorinSuNews(page: number) {
+		const UnilorinSuResponse = await ApiService.request(
+			`${unilorinSuUrl}${page > 1 ? `?page=${page}` : ''}`,
+			RequestMethod.GET
+		);
 
-		let rows: any[] = [];
+		const $ = cheerio.load(UnilorinSuResponse.data);
 
-		let semester = $('table').map((i, elem) => {
-			if (i === 1) {
-				$(elem)
-					.find('tr')
-					.map((i2, el2) => {
-						let row = $(el2).find('td').toArray();
-						let hrefs = $(row[2]).find('a').toArray();
-						let rowObject = {
-							session: $(row[1]).text(),
-							name: $(row[2]).text(),
-							href: $(hrefs[0]).attr('href'),
+		const newsArray: any[] = [];
+
+		$('.col-lg-4.col-md-4').map((i, col) => {
+			$(col)
+				.map((i2, news) => {
+					const link = $(news).find('a').attr('href'),
+						image = '',
+						newsSummary = $(news).find('.summary').find('b'),
+						title = $(newsSummary[0]).text(),
+						date = {
+							day: '',
+							month: '',
 						};
-						if (rowObject.href) {
-							rows.push(rowObject);
-						}
-					})
-					.toArray();
-			}
+
+					newsArray.push({
+						link,
+						image,
+						title,
+						date,
+					});
+				})
+				.toArray();
 		});
 
-		return semester;
+		const pageNumberArray = $('.relative.inline-flex.items-center').toArray();
+		//get the contents of the last pagination button
+		const totalPages = $(pageNumberArray[pageNumberArray.length - 2])
+			.text()
+			.trim();
+
+		return { totalPages: parseInt(totalPages), news: newsArray };
+	}
+
+	public static async getTeamPlatoNews(page: number) {
+		const teamPlatoResponse = await ApiService.request(
+			`${teamPlatoUrl}${page > 1 ? `page/${page}/` : ''}`,
+			RequestMethod.GET
+		);
+
+		const $ = cheerio.load(teamPlatoResponse.data);
+
+		const newsArray: any[] = [];
+
+		$('.col-inner').map((i, col) => {
+			$(col)
+				.map((i2, news) => {
+					const link = $(news).find('a').attr('href'),
+						image = $(news).find('img').attr('src'),
+						title = $(news)
+							.find('h5')
+							.text()
+							.trim()
+							.replace(/(\r\n|\n|\r|\t)/gm, ''),
+						date = {
+							day: $(news).find('.post-date-day').text(),
+							month: $(news).find('.post-date-month').text(),
+						};
+
+					newsArray.push({
+						link,
+						image,
+						title,
+						date,
+					});
+				})
+				.toArray();
+		});
+
+		const pageNumberArray = $('.page-number').toArray();
+		//get the contents of the last pagination button
+		const totalPages = $(pageNumberArray[pageNumberArray.length - 2]).text();
+
+		return { totalPages: parseInt(totalPages), news: newsArray };
+	}
+
+	public static test() {
+		const $ = cheerio.load(
+			fs.readFileSync(
+				path.resolve(__dirname, '../data/scrapper-test.html'),
+				'utf8'
+			)
+		);
+
+		const newsArray: any[] = [];
+
+		$('.col-lg-4.col-md-4').map((i, col) => {
+			$(col)
+				.map((i2, news) => {
+					let link = $(news).find('a').attr('href');
+					let image = '';
+					let newsSummary = $(news).find('.summary').find('b');
+					let title = $(newsSummary[0]).text();
+					let date = {
+						day: '',
+						month: '',
+					};
+
+					newsArray.push({
+						link,
+						image,
+						title,
+						date,
+					});
+				})
+				.toArray();
+		});
+
+		const pageNumberArray = $('.leading-5').find('.font-medium').toArray();
+		//get the contents of the last pagination button
+		const totalPages = $(pageNumberArray[pageNumberArray.length - 1]).text();
+
+		return { totalPages, news: newsArray };
 	}
 }
 

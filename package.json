@@ -10,8 +10,7 @@
 		"prod": "node -r dotenv/config --es-module-specifier-resolution=node dist/server.js",
 		"start": "node -r dotenv/config --es-module-specifier-resolution=node dist/server.js",
 		"dev": "cross-env NODE_ENV=development nodemon -r dotenv/config src/server.ts",
-		"tsc": "./node_modules/typescript/bin/tsc",
-		"build": "tsc -p ."
+		"build": "rimraf ./dist && tsc -p ."
 	},
 	"author": "Mus'ab Olurode",
 	"license": "ISC",

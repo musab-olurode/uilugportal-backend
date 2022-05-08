@@ -47,3 +47,14 @@ export const comment = asyncHandler(async (req: Request, res: Response) => {
 		res
 	);
 });
+
+export const like = asyncHandler(async (req: Request, res: Response) => {
+	const post = await PostService.likePost(
+		req.user!._id,
+		req.params.postId as unknown as Types.ObjectId
+	);
+
+	return new SuccessResponse('post liked/unliked successfully', { post }).send(
+		res
+	);
+});

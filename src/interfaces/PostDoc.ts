@@ -5,4 +5,5 @@ export interface PostDoc extends Document {
 	text: string;
 	images: string[];
 	comments: Types.ObjectId[];
+	likes: Types.ObjectId[];
 }

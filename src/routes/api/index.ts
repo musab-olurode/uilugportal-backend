@@ -15,7 +15,7 @@ apiRoutes.use(fileHandler);
 apiRoutes.use(validate);
 
 // initialize routes
-apiRoutes.use('/', protect, authRouter);
 apiRoutes.use('/', guestRouter);
+apiRoutes.use('/', protect, authRouter);
 
 export default apiRoutes;

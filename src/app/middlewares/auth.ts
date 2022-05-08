@@ -34,9 +34,7 @@ const protect = asyncHandler(
 			if (!sessionId) {
 				throw new AuthFailureError('session id missing from token');
 			}
-			const user: UserDoc | undefined = await User.findById(
-				(decoded as any)._id
-			);
+			const user = await User.findById((decoded as any)._id);
 			if (!user) {
 				throw new AuthFailureError('invalid user id');
 			}

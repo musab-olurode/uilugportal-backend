@@ -107,3 +107,5 @@ dist
 storage/
 # Local Netlify folder
 .netlify
+
+scrapper-test.html

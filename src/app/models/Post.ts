@@ -25,6 +25,12 @@ const PostSchema = new Schema<PostDoc>(
 				ref: 'Comment',
 			},
 		],
+		likes: [
+			{
+				type: Types.ObjectId,
+				ref: 'User',
+			},
+		],
 	},
 	{ timestamps: true }
 );

@@ -71,6 +71,23 @@ class PostService {
 
 		return comment;
 	}
+
+	public static async likePost(userId: Types.ObjectId, postId: Types.ObjectId) {
+		let post = await this.getPost(postId);
+
+		if (post.likes.includes(userId)) {
+			post.likes = post.likes.filter(
+				(id) => id.toString() !== userId.toString()
+			);
+		} else {
+			post.likes.push(userId);
+		}
+
+		await post.save();
+		post = await this.getPost(postId);
+
+		return post;
+	}
 }
 
 export default PostService;

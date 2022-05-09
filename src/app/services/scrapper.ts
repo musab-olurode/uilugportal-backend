@@ -1,5 +1,10 @@
 import cheerio from 'cheerio';
-import { teamPlatoUrl, unilorinPortalUrl, unilorinSuUrl } from '../../configs';
+import {
+	teamBabsUrl,
+	teamPlatoUrl,
+	unilorinPortalUrl,
+	unilorinSuUrl,
+} from '../../configs';
 import {
 	AuthFailureError,
 	ForbiddenError,
@@ -16,6 +21,7 @@ import ApiService from './api';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as chrono from 'chrono-node';
+import INews from '../../interfaces/News';
 
 class ScrapperService {
 	private static handleFallback(
@@ -453,7 +459,7 @@ class ScrapperService {
 
 		const $ = cheerio.load(UnilorinSuResponse.data);
 
-		const newsArray: any[] = [];
+		const newsArray: INews[] = [];
 
 		const promise = $('.col-lg-4.col-md-4').map(async (index, news) => {
 			const link = $(news).find('.btn').attr('href'),
@@ -475,11 +481,11 @@ class ScrapperService {
 			const excerpt = excerptOnlyArray.join(' ');
 
 			const newsObject = {
-				link,
+				link: link!,
 				image,
 				title,
 				excerpt,
-				date,
+				date: date!,
 			};
 
 			newsArray.push(newsObject);
@@ -509,7 +515,7 @@ class ScrapperService {
 
 		const $ = cheerio.load(teamPlatoResponse.data);
 
-		const newsArray: any[] = [];
+		const newsArray: INews[] = [];
 
 		const promise = $('.col-inner').map(async (index, news) => {
 			const link = $(news).find('a').attr('href'),
@@ -527,11 +533,11 @@ class ScrapperService {
 			const date = $newsPage('time').attr('datetime');
 
 			const newsObject = {
-				link,
-				image,
+				link: link!,
+				image: image!,
 				title,
 				excerpt,
-				date,
+				date: date!,
 			};
 
 			newsArray.push(newsObject);
@@ -547,6 +553,48 @@ class ScrapperService {
 		const pageNumberArray = $('.page-number').toArray();
 		//get the contents of the last pagination button
 		const totalPages = $(pageNumberArray[pageNumberArray.length - 2]).text();
+
+		return { totalPages: parseInt(totalPages), news: newsArray };
+	}
+
+	public static async getTeamBabsNews(page: number) {
+		const teamBabsResponse = await ApiService.request(
+			`${teamBabsUrl}${page > 1 ? `page/${page}/` : ''}`,
+			RequestMethod.GET
+		);
+
+		const $ = cheerio.load(teamBabsResponse.data);
+
+		const newsArray: INews[] = [];
+
+		const TEAM_BABS_IMAGE_URL =
+			'https://teambabsreporting.com/wp-content/uploads/2021/01/IMG-20210110-WA0126-300x300.jpg';
+
+		$('.td-block-span6').map((index, news) => {
+			const link = $(news).find('.td-image-wrap').attr('href'),
+				image = TEAM_BABS_IMAGE_URL,
+				title = $(news).find('h3').text().trim(),
+				excerpt = '',
+				date = $(news).find('time').attr('datetime');
+
+			const newsObject = {
+				link: link!,
+				image,
+				title,
+				excerpt,
+				date: date!,
+			};
+
+			newsArray.push(newsObject);
+			return newsObject;
+		});
+
+		newsArray.sort((a, b) => {
+			return new Date(b.date).getTime() - new Date(a.date).getTime();
+		});
+
+		//get the contents of the last pagination button
+		const totalPages = $('a.last').text();
 
 		return { totalPages: parseInt(totalPages), news: newsArray };
 	}

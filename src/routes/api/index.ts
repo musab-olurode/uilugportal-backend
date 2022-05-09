@@ -1,4 +1,5 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
+import apicache from 'apicache';
 const apiRoutes = express.Router();
 
 import advancedResults from '../../app/middlewares/advancedResults';

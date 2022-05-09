@@ -7,6 +7,8 @@ import { uploadFile } from '../helpers/upload';
 import Comment from '../models/Comment';
 import Post from '../models/Post';
 
+const MAX_IMAGES_PER_POST = 5;
+
 class PostService {
 	public static async createPost(
 		user: UserDoc,
@@ -20,8 +22,10 @@ class PostService {
 				images = [images];
 			}
 
-			if (images.length > 2) {
-				throw new BadRequestError('Only 2 images are allowed');
+			if (images.length > MAX_IMAGES_PER_POST) {
+				throw new BadRequestError(
+					`Only a maximum of ${MAX_IMAGES_PER_POST} images are allowed`
+				);
 			}
 
 			for (let i = 0; i < images.length; i++) {

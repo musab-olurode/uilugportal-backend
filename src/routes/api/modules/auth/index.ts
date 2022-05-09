@@ -1,5 +1,11 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
+import apicache from 'apicache';
 const authRoutes = express.Router();
+
+// caching
+const cache = apicache.middleware;
+const onlyStatus200 = (req: Request, res: Response) => res.statusCode === 200;
+authRoutes.use(cache('5 minutes', onlyStatus200));
 
 // add api routes below
 import authRouter from './auth';

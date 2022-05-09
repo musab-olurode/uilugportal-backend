@@ -15,9 +15,11 @@
 	"author": "Mus'ab Olurode",
 	"license": "ISC",
 	"dependencies": {
+		"apicache": "^1.6.3",
 		"axios": "^0.24.0",
 		"bcryptjs": "^2.4.3",
 		"cheerio": "^1.0.0-rc.10",
+		"chrono-node": "^2.3.8",
 		"cloudinary": "^1.29.1",
 		"colors": "^1.4.0",
 		"cookie-parser": "^1.4.5",
@@ -42,6 +44,7 @@
 		"xss-clean": "^0.1.1"
 	},
 	"devDependencies": {
+		"@types/apicache": "^1.6.1",
 		"@types/axios": "^0.14.0",
 		"@types/bcryptjs": "^2.4.2",
 		"@types/cheerio": "^0.22.30",

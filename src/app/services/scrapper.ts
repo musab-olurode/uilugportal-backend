@@ -15,6 +15,7 @@ import { PageTitle, RequestMethod } from '../helpers/enums';
 import ApiService from './api';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as chrono from 'chrono-node';
 
 class ScrapperService {
 	private static handleFallback(
@@ -454,26 +455,41 @@ class ScrapperService {
 
 		const newsArray: any[] = [];
 
-		$('.col-lg-4.col-md-4').map((i, col) => {
-			$(col)
-				.map((i2, news) => {
-					const link = $(news).find('a').attr('href'),
-						image = '',
-						newsSummary = $(news).find('.summary').find('b'),
-						title = $(newsSummary[0]).text(),
-						date = {
-							day: '',
-							month: '',
-						};
+		const promise = $('.col-lg-4.col-md-4').map(async (index, news) => {
+			const link = $(news).find('.btn').attr('href'),
+				image = '',
+				newsSummary = $(news).find('.summary').find('b'),
+				title = $(newsSummary[0]).text(),
+				excerptArray = $(news).find('.summary').text().trim();
 
-					newsArray.push({
-						link,
-						image,
-						title,
-						date,
-					});
-				})
-				.toArray();
+			const newsPage = await ApiService.request(link!, RequestMethod.GET);
+			const $newsPage = cheerio.load(newsPage.data);
+
+			const dateAgo = $newsPage('.posting-info').text().trim();
+
+			const date = chrono.parseDate(dateAgo).toISOString();
+
+			// eslint-disable-next-line no-unused-vars
+			const [addedTitle, ...excerptOnlyArray] = excerptArray.split('\n\n');
+
+			const excerpt = excerptOnlyArray.join(' ');
+
+			const newsObject = {
+				link,
+				image,
+				title,
+				excerpt,
+				date,
+			};
+
+			newsArray.push(newsObject);
+			return newsObject;
+		});
+
+		await Promise.all(promise);
+
+		newsArray.sort((a, b) => {
+			return new Date(b.date).getTime() - new Date(a.date).getTime();
 		});
 
 		const pageNumberArray = $('.relative.inline-flex.items-center').toArray();
@@ -495,29 +511,37 @@ class ScrapperService {
 
 		const newsArray: any[] = [];
 
-		$('.col-inner').map((i, col) => {
-			$(col)
-				.map((i2, news) => {
-					const link = $(news).find('a').attr('href'),
-						image = $(news).find('img').attr('src'),
-						title = $(news)
-							.find('h5')
-							.text()
-							.trim()
-							.replace(/(\r\n|\n|\r|\t)/gm, ''),
-						date = {
-							day: $(news).find('.post-date-day').text(),
-							month: $(news).find('.post-date-month').text(),
-						};
+		const promise = $('.col-inner').map(async (index, news) => {
+			const link = $(news).find('a').attr('href'),
+				image = $(news).find('img').attr('src'),
+				title = $(news)
+					.find('h5')
+					.text()
+					.trim()
+					.replace(/(\r\n|\n|\r|\t)/gm, ''),
+				excerpt = $(news).find('.from_the_blog_excerpt').text().trim();
 
-					newsArray.push({
-						link,
-						image,
-						title,
-						date,
-					});
-				})
-				.toArray();
+			const newsPage = await ApiService.request(link!, RequestMethod.GET);
+			const $newsPage = cheerio.load(newsPage.data);
+
+			const date = $newsPage('time').attr('datetime');
+
+			const newsObject = {
+				link,
+				image,
+				title,
+				excerpt,
+				date,
+			};
+
+			newsArray.push(newsObject);
+			return newsObject;
+		});
+
+		await Promise.all(promise);
+
+		newsArray.sort((a, b) => {
+			return new Date(b.date).getTime() - new Date(a.date).getTime();
 		});
 
 		const pageNumberArray = $('.page-number').toArray();

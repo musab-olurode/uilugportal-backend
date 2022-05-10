@@ -58,3 +58,12 @@ export const like = asyncHandler(async (req: Request, res: Response) => {
 		res
 	);
 });
+
+export const destroy = asyncHandler(async (req: Request, res: Response) => {
+	await PostService.deletePost(
+		req.user!._id,
+		req.params.postId as unknown as Types.ObjectId
+	);
+
+	return new SuccessResponse('post deleted successfully', {}).send(res);
+});

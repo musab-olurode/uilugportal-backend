@@ -1,6 +1,7 @@
 import express from 'express';
 import {
 	comment,
+	destroy,
 	index,
 	like,
 	show,
@@ -11,7 +12,7 @@ const router = express.Router();
 
 router.route('/').post(store).get(index);
 
-router.get('/:postId', show);
+router.route('/:postId').get(show).delete(destroy);
 
 router.post('/:postId/comment', comment);
 

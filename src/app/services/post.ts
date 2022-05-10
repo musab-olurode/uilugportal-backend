@@ -7,7 +7,7 @@ import {
 	NotFoundError,
 } from '../../core/ApiError';
 import { UserDoc } from '../../interfaces/UserDoc';
-import { uploadFile } from '../helpers/upload';
+import { deleteUpload, uploadFile } from '../helpers/upload';
 import Comment from '../models/Comment';
 import Post from '../models/Post';
 
@@ -105,6 +105,12 @@ class PostService {
 
 		if (!userId.equals(post.user)) {
 			throw new AuthFailureError('You cannot delete this post');
+		}
+
+		if (post.images.length > 0) {
+			for (const image of post.images) {
+				await deleteUpload(image);
+			}
 		}
 
 		await post.remove();

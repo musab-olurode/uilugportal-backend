@@ -1,7 +1,11 @@
 import { Response } from 'express';
 import { UploadedFile } from 'express-fileupload';
 import { Types } from 'mongoose';
-import { BadRequestError, NotFoundError } from '../../core/ApiError';
+import {
+	AuthFailureError,
+	BadRequestError,
+	NotFoundError,
+} from '../../core/ApiError';
 import { UserDoc } from '../../interfaces/UserDoc';
 import { uploadFile } from '../helpers/upload';
 import Comment from '../models/Comment';
@@ -91,6 +95,19 @@ class PostService {
 		post = await this.getPost(postId);
 
 		return post;
+	}
+
+	public static async deletePost(
+		userId: Types.ObjectId,
+		postId: Types.ObjectId
+	) {
+		const post = await this.getPost(postId);
+
+		if (!userId.equals(post.user)) {
+			throw new AuthFailureError('You cannot delete this post');
+		}
+
+		await post.remove();
 	}
 }
 

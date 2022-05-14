@@ -4,7 +4,7 @@ import NewsService from '../services/news';
 
 export const getNews = asyncHandler(async (req: Request, res: Response) => {
 	await req.validate({
-		source: 'string|in:unilorinsu,teamplato',
+		source: 'string|in:unilorinsu,teamplato,teambabs',
 		page: 'numeric|min:1',
 	});
 

@@ -28,4 +28,6 @@ const ResourceSchema = new Schema<ResourceDoc>(
 	{ timestamps: true }
 );
 
+ResourceSchema.index({ '$**': 'text' });
+
 export default model<ResourceDoc>('Resource', ResourceSchema);

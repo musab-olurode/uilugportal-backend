@@ -124,7 +124,7 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
 	req.validate = async (
 		rules: Rules,
 		locations: ValidationLocation[] = ['params', 'query', 'body', 'files'],
-		customMessages = {}
+		customMessages?: ErrorMessages
 	) => {
 		// eslint-disable-next-line no-unused-vars
 		return await new Promise<Response | void>((resolve, reject) => {

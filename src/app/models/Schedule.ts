@@ -38,4 +38,6 @@ const ScheduleSchema = new Schema<ScheduleDoc>(
 	{ timestamps: true }
 );
 
+ScheduleSchema.index({ '$**': 'text' });
+
 export default model<ScheduleDoc>('Schedule', ScheduleSchema);

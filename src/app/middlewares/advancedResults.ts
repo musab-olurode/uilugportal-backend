@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { Model, Query } from 'mongoose';
 import IPagination from '../../interfaces/Pagination';
+import { API_RESPONSE_PAGE_SIZE } from '../helpers/constants';
 
 const advancedResults = (req: Request, res: Response, next: NextFunction) => {
 	res.advancedResults = async (
 		model: Model<any>,
 		populate: { path: string; select?: string }[]
 	) => {
-		let query: Query<typeof model[], any, {}, any>;
+		let query: Query<Model<any>[], any, {}, any>;
 
 		const reqQuery = { ...(req.query as any) };
 
@@ -64,20 +65,21 @@ const advancedResults = (req: Request, res: Response, next: NextFunction) => {
 			query = query.sort('-createdAt');
 		}
 
-		// Pagination
-		const page = parseInt(req.query.page as string, 10) || 1;
-		const limit = parseInt(req.query.limit as string, 10) || 25;
-		const startIndex = (page - 1) * limit;
-		const endIndex = page * limit;
-		const total = await model.countDocuments();
-
-		query = query.skip(startIndex).limit(limit);
-
 		if (populate && populate.length > 0) {
 			populate.forEach((pop) => {
 				query = query.populate(pop.path, pop.select);
 			});
 		}
+
+		// Pagination
+		const page = parseInt(req.query.page as string, 10) || 1;
+		const limit =
+			parseInt(req.query.limit as string, 10) || API_RESPONSE_PAGE_SIZE;
+		const startIndex = (page - 1) * limit;
+		const endIndex = page * limit;
+		const total = await model.countDocuments();
+
+		query = query.skip(startIndex).limit(limit);
 
 		// Executing query
 		const results = await query;

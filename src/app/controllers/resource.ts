@@ -79,3 +79,19 @@ export const destroy = asyncHandler(async (req: Request, res: Response) => {
 
 	return new SuccessResponse('resource deleted successfully', {}).send(res);
 });
+
+export const search = asyncHandler(async (req: Request, res: Response) => {
+	await req.validate(
+		{
+			s: 'required|string|min:3',
+		},
+		['query'],
+		{
+			'required.s': 'The search query is required',
+			'string.s': 'The search query must be a string',
+			'min.s': 'The search query must be at least 3 characters long',
+		}
+	);
+
+	return await await ResourceService.searchResources(req, res);
+});

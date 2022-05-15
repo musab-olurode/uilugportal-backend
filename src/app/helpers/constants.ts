@@ -62,6 +62,8 @@ const getSessionsAsString = () => {
 	return sessionsAsString;
 };
 
+const API_RESPONSE_PAGE_SIZE = 25;
+
 export {
 	generateString,
 	numberWithCommas,
@@ -70,4 +72,5 @@ export {
 	getSessions,
 	getSessionsAsString,
 	normalizeName,
+	API_RESPONSE_PAGE_SIZE,
 };

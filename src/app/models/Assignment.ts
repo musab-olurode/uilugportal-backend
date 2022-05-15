@@ -24,4 +24,6 @@ const AssignmentSchema = new Schema<AssignmentDoc>(
 	{ timestamps: true }
 );
 
+AssignmentSchema.index({ '$**': 'text' });
+
 export default model<AssignmentDoc>('Assignment', AssignmentSchema);

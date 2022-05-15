@@ -35,4 +35,6 @@ const PostSchema = new Schema<PostDoc>(
 	{ timestamps: true }
 );
 
+PostSchema.index({ '$**': 'text' });
+
 export default model<PostDoc>('Post', PostSchema);

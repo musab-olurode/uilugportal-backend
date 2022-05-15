@@ -5,7 +5,7 @@ import Schedule from '../models/Schedule';
 
 class ScheduleService {
 	public static async getSchedules(res: Response) {
-		return await res.advancedResults(Schedule);
+		return await res.advancedResults(Schedule, 'user');
 	}
 
 	public static async getSchedule(scheduleId: Types.ObjectId) {

@@ -5,7 +5,7 @@ import Assignment from '../models/Assignment';
 
 class AssignmentService {
 	public static async getAssignments(res: Response) {
-		return await res.advancedResults(Assignment);
+		return await res.advancedResults(Assignment, 'user');
 	}
 
 	public static async getAssignment(assignmentId: Types.ObjectId) {

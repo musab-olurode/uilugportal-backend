@@ -48,11 +48,16 @@ class PostService {
 	}
 
 	public static async getPosts(res: Response) {
-		return await res.advancedResults(Post, 'user');
+		return await res.advancedResults(Post, [
+			{ path: 'user', select: 'fullName avatar faculty department level' },
+		]);
 	}
 
 	public static async getPost(postId: Types.ObjectId) {
-		const post = await Post.findById(postId).populate('user');
+		const post = await Post.findById(postId).populate(
+			'user',
+			'fullName avatar faculty department level'
+		);
 
 		if (!post) {
 			throw new NotFoundError('post not found');

@@ -1,18 +1,20 @@
 import { Response } from 'express';
-import { UploadedFile } from 'express-fileupload';
 import { Types } from 'mongoose';
-import { BadRequestError, NotFoundError } from '../../core/ApiError';
-import { UserDoc } from '../../interfaces/UserDoc';
-import { uploadFile } from '../helpers/upload';
+import { NotFoundError } from '../../core/ApiError';
 import Comment from '../models/Comment';
 
 class CommentService {
 	public static async getComments(res: Response) {
-		return await res.advancedResults(Comment, 'user');
+		return await res.advancedResults(Comment, [
+			{ path: 'user', select: 'fullName avatar faculty department level' },
+		]);
 	}
 
 	public static async getComment(commentId: Types.ObjectId) {
-		const comment = await Comment.findById(commentId).populate('user');
+		const comment = await Comment.findById(commentId).populate(
+			'user',
+			'fullName avatar faculty department level'
+		);
 
 		if (!comment) {
 			throw new NotFoundError('comment not found');

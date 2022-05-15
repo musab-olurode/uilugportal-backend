@@ -1,10 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
-import { Model, PopulateOptions } from 'mongoose';
+import { Model, Query } from 'mongoose';
 import IPagination from '../../interfaces/Pagination';
 
 const advancedResults = (req: Request, res: Response, next: NextFunction) => {
-	res.advancedResults = async (model: Model<any>, ...populate: any) => {
-		let query;
+	res.advancedResults = async (
+		model: Model<any>,
+		populate: { path: string; select?: string }[]
+	) => {
+		let query: Query<typeof model[], any, {}, any>;
 
 		const reqQuery = { ...(req.query as any) };
 
@@ -70,8 +73,10 @@ const advancedResults = (req: Request, res: Response, next: NextFunction) => {
 
 		query = query.skip(startIndex).limit(limit);
 
-		if (populate) {
-			query = query.populate(populate);
+		if (populate && populate.length > 0) {
+			populate.forEach((pop) => {
+				query = query.populate(pop.path, pop.select);
+			});
 		}
 
 		// Executing query

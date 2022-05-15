@@ -6,7 +6,6 @@ const fileHandler = (req: Request, res: Response, next: NextFunction) => {
 		Object.entries(newFiles).forEach(([key, file]) => {
 			if (!Array.isArray(file)) {
 				(file as any).isFile = true;
-				newFiles![key] = [file];
 			} else {
 				file.forEach((singleFile) => {
 					(singleFile as any).isFile = true;

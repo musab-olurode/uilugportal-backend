@@ -41,7 +41,7 @@ class ResourceService {
 			);
 		}
 
-		const uploadedFile = await uploadFile(file, 'resources');
+		const uploadedFile = await uploadFile(file, true, 'resources');
 		const fileUrl = uploadedFile.url;
 
 		const resource = await Resource.create({
@@ -82,7 +82,7 @@ class ResourceService {
 				);
 			}
 
-			const uploadedFile = await uploadFile(file, 'resources');
+			const uploadedFile = await uploadFile(file, true, 'resources');
 			(resourceData as any).file = uploadedFile.url;
 
 			await deleteUpload(resource.file);

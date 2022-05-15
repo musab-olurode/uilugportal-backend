@@ -34,7 +34,11 @@ const formatAsDataUri = (file: UploadedFile) =>
  * @param {object} fields The request body
  * @returns {object} returns the response object cloudinary which contains the image url
  */
-export const uploadFile = async (file: UploadedFile, folder?: string) => {
+export const uploadFile = async (
+	file: UploadedFile,
+	useFileName = true,
+	folder?: string
+) => {
 	const uploadedFile = {
 		url: '',
 		public_id: '',
@@ -44,7 +48,9 @@ export const uploadFile = async (file: UploadedFile, folder?: string) => {
 
 	const options = {
 		folder: folder || 'media',
-		resource_type: 'image',
+		resource_type: 'auto',
+		use_filename: useFileName,
+		filename_override: file.name,
 		timeout: 600000,
 	};
 

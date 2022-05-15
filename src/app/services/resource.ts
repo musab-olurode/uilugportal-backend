@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { UploadedFile } from 'express-fileupload';
 import { Types } from 'mongoose';
 import {
@@ -8,6 +8,7 @@ import {
 } from '../../core/ApiError';
 import { deleteUpload, uploadFile } from '../helpers/upload';
 import Resource from '../models/Resource';
+import PaginationService from './paginate';
 
 const MAX_FILES_PER_RESOURCE = 1;
 
@@ -122,6 +123,14 @@ class ResourceService {
 		}
 
 		await resource.remove();
+	}
+
+	public static async searchResources(req: Request, res: Response) {
+		const query = Resource.find({
+			$text: { $search: req.query.s as string },
+		}).populate('user', 'fullName avatar faculty department level');
+
+		return await PaginationService.paginate(req, res, query as any);
 	}
 }
 

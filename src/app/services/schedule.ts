@@ -5,11 +5,16 @@ import Schedule from '../models/Schedule';
 
 class ScheduleService {
 	public static async getSchedules(res: Response) {
-		return await res.advancedResults(Schedule, 'user');
+		return await res.advancedResults(Schedule, [
+			{ path: 'user', select: 'fullName avatar faculty department level' },
+		]);
 	}
 
 	public static async getSchedule(scheduleId: Types.ObjectId) {
-		const schedule = await Schedule.findById(scheduleId);
+		const schedule = await Schedule.findById(scheduleId).populate(
+			'user',
+			'fullName avatar faculty department level'
+		);
 
 		if (!schedule) {
 			throw new NotFoundError(`Schedule with id ${scheduleId} not found`);

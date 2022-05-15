@@ -5,11 +5,16 @@ import Assignment from '../models/Assignment';
 
 class AssignmentService {
 	public static async getAssignments(res: Response) {
-		return await res.advancedResults(Assignment, 'user');
+		return await res.advancedResults(Assignment, [
+			{ path: 'user', select: 'fullName avatar faculty department level' },
+		]);
 	}
 
 	public static async getAssignment(assignmentId: Types.ObjectId) {
-		const assignment = await Assignment.findById(assignmentId);
+		const assignment = await Assignment.findById(assignmentId).populate(
+			'user',
+			'fullName avatar faculty department level'
+		);
 
 		if (!assignment) {
 			throw new NotFoundError(`Assignment with id ${assignmentId} not found`);

@@ -13,11 +13,16 @@ const MAX_FILES_PER_RESOURCE = 1;
 
 class ResourceService {
 	public static async getResources(res: Response) {
-		return await res.advancedResults(Resource, 'user');
+		return await res.advancedResults(Resource, [
+			{ path: 'user', select: 'fullName avatar faculty department level' },
+		]);
 	}
 
 	public static async getResource(resourceId: Types.ObjectId) {
-		const resource = await Resource.findById(resourceId);
+		const resource = await Resource.findById(resourceId).populate(
+			'user',
+			'fullName avatar faculty department level'
+		);
 
 		if (!resource) {
 			throw new NotFoundError(`Resource with id ${resourceId} not found`);

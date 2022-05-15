@@ -15,7 +15,7 @@ declare namespace Express {
 	interface Response {
 		advancedResults: (
 			model: import('mongoose').Model<any>,
-			...populate: any
+			populate: { path: string; select?: string }[]
 		) => Promise<any>;
 	}
 }

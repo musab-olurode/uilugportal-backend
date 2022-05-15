@@ -33,7 +33,7 @@ class PostService {
 			}
 
 			for (let i = 0; i < images.length; i++) {
-				const uploadedFile = await uploadFile(images[i], 'posts');
+				const uploadedFile = await uploadFile(images[i], false, 'posts');
 				imageUrls.push(uploadedFile.url);
 			}
 		}

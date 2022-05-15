@@ -13,7 +13,7 @@ const MAX_FILES_PER_RESOURCE = 1;
 
 class ResourceService {
 	public static async getResources(res: Response) {
-		return await res.advancedResults(Resource);
+		return await res.advancedResults(Resource, 'user');
 	}
 
 	public static async getResource(resourceId: Types.ObjectId) {

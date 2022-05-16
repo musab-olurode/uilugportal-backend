@@ -19,16 +19,24 @@ export const show = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const store = asyncHandler(async (req: Request, res: Response) => {
-	await req.validate({
-		courseCode: 'required|string',
-		courseTitle: 'required|string',
-		venue: 'required|string',
-		weekdays: 'required|array',
-		'weekdays.*': 'required|string|in:Mon,Tue,Wed,Thu,Fri,Sat,Sun',
-		startTime: 'required|date',
-		endTime: 'required|date',
-		note: 'string',
-	});
+	await req.validate(
+		{
+			courseCode: 'required|string',
+			courseTitle: 'required|string',
+			venue: 'required|string',
+			weekdays: 'array',
+			'weekdays.*': 'required|string|in:Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+			startTime: 'required|date',
+			endTime: 'required|date',
+			note: 'string',
+		},
+		['body'],
+		{
+			'required.weekdays.*': 'a weekday is required',
+			'string.weekdays.*': 'a weekday must be a string',
+			'in.weekdays.*': 'weekdays must be one of Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+		}
+	);
 
 	const scheduleData = req.validated();
 

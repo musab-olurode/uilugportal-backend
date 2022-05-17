@@ -45,7 +45,7 @@ export const store = asyncHandler(async (req: Request, res: Response) => {
 		scheduleData
 	);
 
-	return new SuccessResponse('schedule updated successfully', {
+	return new SuccessResponse('schedule created successfully', {
 		schedule,
 	}).send(res);
 });

@@ -22,7 +22,15 @@ const ScheduleSchema = new Schema<ScheduleDoc>(
 		},
 		weekdays: {
 			type: [String],
-			enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+			enum: [
+				'Monday',
+				'Tuesday',
+				'Wednesday',
+				'Thursday',
+				'Friday',
+				'Saturday',
+				'Sunday',
+			],
 		},
 		startTime: {
 			type: Date,

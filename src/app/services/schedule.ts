@@ -56,7 +56,7 @@ class ScheduleService {
 			note?: string;
 		}
 	) {
-		let schedule = await Schedule.findById(scheduleId);
+		let schedule = await Schedule.findOne({ _id: scheduleId, user: userId });
 
 		if (!schedule) {
 			throw new NotFoundError(`Schedule with id ${scheduleId} not found`);

@@ -24,7 +24,8 @@ export const index = asyncHandler(async (req: Request, res: Response) => {
 
 export const show = asyncHandler(async (req: Request, res: Response) => {
 	const post = await PostService.getPost(
-		req.params.postId as unknown as Types.ObjectId
+		req.params.postId as unknown as Types.ObjectId,
+		req.user!._id
 	);
 
 	return new SuccessResponse('post retrieved successfully', { post }).send(res);
@@ -57,14 +58,15 @@ export const getComments = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const like = asyncHandler(async (req: Request, res: Response) => {
-	const post = await PostService.likePost(
+	const { post, isLike } = await PostService.likePost(
 		req.user!._id,
 		req.params.postId as unknown as Types.ObjectId
 	);
 
-	return new SuccessResponse('post liked/unliked successfully', { post }).send(
-		res
-	);
+	return new SuccessResponse(
+		`post ${isLike ? 'liked' : 'unliked'} successfully`,
+		{ post }
+	).send(res);
 });
 
 export const destroy = asyncHandler(async (req: Request, res: Response) => {

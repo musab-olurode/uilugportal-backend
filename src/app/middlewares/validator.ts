@@ -1,5 +1,5 @@
 import Validator, { ErrorMessages, Errors, Rules } from 'validatorjs';
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
 import { obj } from '../../interfaces/obj';
 import { ValidationLocation } from '../../interfaces/ValidationLocation';
@@ -21,7 +21,7 @@ const registerCustomRules = () => {
 			const modelField = requirements[1];
 			const formattedModelName =
 				modelName.charAt(0).toUpperCase() + modelName.slice(1);
-			const Model = mongoose.connection.model(formattedModelName);
+			const Model: Model<any> = mongoose.connection.model(formattedModelName);
 			const foundModel = await Model.findOne({ [modelField]: value });
 			if (!foundModel) {
 				return passes(false, `The ${attribute} does not exist.`);
@@ -45,7 +45,7 @@ const registerCustomRules = () => {
 			const modelField = requirements[1];
 			const formattedModelName =
 				modelName.charAt(0).toUpperCase() + modelName.slice(1);
-			const Model = mongoose.connection.model(formattedModelName);
+			const Model: Model<any> = mongoose.connection.model(formattedModelName);
 			const foundModel = await Model.findOne({ [modelField]: value });
 			if (foundModel) {
 				return passes(false, `The ${attribute} already exists.`);

@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { AdminDoc } from '../../interfaces/AdminDoc';
 
-const AdminSchema = new Schema<AdminDoc>(
+const AdminSchema = new Schema(
 	{
 		permissions: {
 			type: [String],

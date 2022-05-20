@@ -1,7 +1,7 @@
 import { Schema, model, Types } from 'mongoose';
 import { CommentDoc } from '../../interfaces/CommentDoc';
 
-const CommentSchema = new Schema<CommentDoc>(
+const CommentSchema = new Schema(
 	{
 		user: {
 			type: Types.ObjectId,

@@ -130,7 +130,7 @@ class ResourceService {
 			$text: { $search: req.query.s as string },
 		}).populate('user', 'fullName avatar faculty department level');
 
-		return await PaginationService.paginate(req, res, query);
+		return await PaginationService.paginate(req, res, Resource, query);
 	}
 }
 

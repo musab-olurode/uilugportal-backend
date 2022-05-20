@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Query, Document, Aggregate, PipelineStage, Model } from 'mongoose';
+import { Query, Document, PipelineStage, Model } from 'mongoose';
 import IPagination from '../../interfaces/Pagination';
 import { API_RESPONSE_PAGE_SIZE } from '../helpers/constants';
 
@@ -7,6 +7,7 @@ class PaginationService {
 	public static async paginate(
 		req: Request,
 		res: Response,
+		model: Model<any>,
 		query: Query<Document<any>[], any, {}, any>,
 		responseMessage?: string
 	) {
@@ -16,13 +17,12 @@ class PaginationService {
 			parseInt(req.query.limit as string, 10) || API_RESPONSE_PAGE_SIZE;
 		const startIndex = (page - 1) * limit;
 		const endIndex = page * limit;
+		const total = await model.countDocuments();
 
 		query = query.skip(startIndex).limit(limit);
 
 		// Execute query
 		const results = await query;
-
-		const total = await query.countDocuments();
 
 		// Pagination result
 		const pagination: IPagination = { current: page, limit, total };

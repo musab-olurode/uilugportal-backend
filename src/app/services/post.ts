@@ -85,6 +85,28 @@ class PostService {
 			},
 			{ $addFields: { likeCount: { $size: '$likeCount' } } },
 			{
+				$lookup: {
+					from: 'likes',
+					let: { postId: '$_id' },
+					pipeline: [
+						{ $match: { $expr: { $eq: ['$$postId', '$post'] } } },
+						{
+							$match: {
+								$expr: { $eq: [new Types.ObjectId(req.user!.id), '$user'] },
+							},
+						},
+					],
+					as: 'isUserLiked',
+				},
+			},
+			{
+				$addFields: {
+					isUserLiked: {
+						$cond: [{ $eq: [{ $size: '$isUserLiked' }, 1] }, true, false],
+					},
+				},
+			},
+			{
 				$project: {
 					_id: 1,
 					user: {
@@ -99,6 +121,7 @@ class PostService {
 					images: 1,
 					commentCount: 1,
 					likeCount: 1,
+					isUserLiked: 1,
 					createdAt: 1,
 				},
 			},
@@ -113,7 +136,7 @@ class PostService {
 		);
 	}
 
-	public static async getPost(postId: Types.ObjectId) {
+	public static async getPost(postId: Types.ObjectId, userId: Types.ObjectId) {
 		const aggregationResult = await Post.aggregate([
 			{
 				$match: {
@@ -150,6 +173,28 @@ class PostService {
 			},
 			{ $addFields: { likeCount: { $size: '$likeCount' } } },
 			{
+				$lookup: {
+					from: 'likes',
+					let: { postId: '$_id' },
+					pipeline: [
+						{ $match: { $expr: { $eq: ['$$postId', '$post'] } } },
+						{
+							$match: {
+								$expr: { $eq: [new Types.ObjectId(userId), '$user'] },
+							},
+						},
+					],
+					as: 'isUserLiked',
+				},
+			},
+			{
+				$addFields: {
+					isUserLiked: {
+						$cond: [{ $eq: [{ $size: '$isUserLiked' }, 1] }, true, false],
+					},
+				},
+			},
+			{
 				$project: {
 					_id: 1,
 					user: {
@@ -164,6 +209,7 @@ class PostService {
 					images: 1,
 					commentCount: 1,
 					likeCount: 1,
+					isUserLiked: 1,
 					createdAt: 1,
 				},
 			},
@@ -183,7 +229,7 @@ class PostService {
 		postId: Types.ObjectId,
 		text: string
 	) {
-		const post = await this.getPost(postId);
+		const post = await this.getPost(postId, userId);
 
 		const comment = await Comment.create({
 			post: post._id,
@@ -207,18 +253,21 @@ class PostService {
 		return await PaginationService.paginate(
 			req,
 			res,
+			Comment,
 			commentsQuery,
 			'post comments retrieved successfully'
 		);
 	}
 
 	public static async likePost(userId: Types.ObjectId, postId: Types.ObjectId) {
-		let post = await this.getPost(postId);
+		let post = await this.getPost(postId, userId);
 
-		const userLike = Like.findOne({
+		const userLike = await Like.findOne({
 			user: userId,
 			post: postId,
 		});
+
+		const isLike = userLike ? false : true;
 
 		if (userLike) {
 			await userLike.remove();
@@ -229,14 +278,16 @@ class PostService {
 			});
 		}
 
-		return post;
+		post = await this.getPost(postId, userId);
+
+		return { post, isLike };
 	}
 
 	public static async deletePost(
 		userId: Types.ObjectId,
 		postId: Types.ObjectId
 	) {
-		const post = await this.getPost(postId);
+		const post = await this.getPost(postId, userId);
 
 		if (!userId.equals(post.user)) {
 			throw new AuthFailureError('You cannot delete this post');

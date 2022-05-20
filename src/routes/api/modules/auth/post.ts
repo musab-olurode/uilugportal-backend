@@ -2,6 +2,7 @@ import express from 'express';
 import {
 	comment,
 	destroy,
+	getComments,
 	index,
 	like,
 	show,
@@ -15,6 +16,8 @@ router.route('/').post(store).get(index);
 router.route('/:postId').get(show).delete(destroy);
 
 router.post('/:postId/comment', comment);
+
+router.get('/:postId/comments', getComments);
 
 router.post('/:postId/like', like);
 

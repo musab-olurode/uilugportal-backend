@@ -4,6 +4,6 @@ export interface PostDoc extends Document {
 	user: Types.ObjectId;
 	text: string;
 	images: string[];
-	comments: Types.ObjectId[];
-	likes: Types.ObjectId[];
+	comments: Types.ObjectId[] | undefined;
+	likes: Types.ObjectId[] | undefined;
 }

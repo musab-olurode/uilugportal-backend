@@ -8,7 +8,7 @@ export const store = asyncHandler(async (req: Request, res: Response) => {
 	await req.validate({
 		text: 'required|string',
 		image: 'array',
-		'image.*': 'file|mime:image|fileSize:2',
+		'image.*': 'file|mime:image',
 	});
 
 	const { text, image } = req.validated();
@@ -19,7 +19,7 @@ export const store = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const index = asyncHandler(async (req: Request, res: Response) => {
-	return await PostService.getPosts(res);
+	return await PostService.getPosts(req, res);
 });
 
 export const show = asyncHandler(async (req: Request, res: Response) => {
@@ -45,6 +45,14 @@ export const comment = asyncHandler(async (req: Request, res: Response) => {
 
 	return new SuccessResponse('comment created successfully', { comment }).send(
 		res
+	);
+});
+
+export const getComments = asyncHandler(async (req: Request, res: Response) => {
+	return await PostService.getPostComments(
+		req,
+		res,
+		req.params.postId as unknown as Types.ObjectId
 	);
 });
 

@@ -1,7 +1,7 @@
 import { Schema, model, Types } from 'mongoose';
 import { PostDoc } from '../../interfaces/PostDoc';
 
-const PostSchema = new Schema<PostDoc>(
+const PostSchema = new Schema(
 	{
 		user: {
 			type: Types.ObjectId,
@@ -19,20 +19,8 @@ const PostSchema = new Schema<PostDoc>(
 				'{PATH} exceeds the limit of 2',
 			],
 		},
-		comments: [
-			{
-				type: Types.ObjectId,
-				ref: 'Comment',
-			},
-		],
-		likes: [
-			{
-				type: Types.ObjectId,
-				ref: 'User',
-			},
-		],
 	},
-	{ timestamps: true }
+	{ timestamps: true, toJSON: { virtuals: true } }
 );
 
 PostSchema.index({ '$**': 'text' });

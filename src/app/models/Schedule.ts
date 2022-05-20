@@ -1,7 +1,7 @@
 import { Schema, model, Types } from 'mongoose';
 import { ScheduleDoc } from '../../interfaces/ScheduleDoc';
 
-const ScheduleSchema = new Schema<ScheduleDoc>(
+const ScheduleSchema = new Schema(
 	{
 		user: {
 			type: Types.ObjectId,

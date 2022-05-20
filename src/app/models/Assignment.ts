@@ -1,7 +1,7 @@
 import { Schema, model, Types } from 'mongoose';
 import { AssignmentDoc } from '../../interfaces/AssignmentDoc';
 
-const AssignmentSchema = new Schema<AssignmentDoc>(
+const AssignmentSchema = new Schema(
 	{
 		user: {
 			type: Types.ObjectId,

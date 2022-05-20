@@ -1,7 +1,7 @@
 import { Schema, model, Types } from 'mongoose';
 import { ResourceDoc } from '../../interfaces/ResourceDoc';
 
-const ResourceSchema = new Schema<ResourceDoc>(
+const ResourceSchema = new Schema(
 	{
 		user: {
 			type: Types.ObjectId,

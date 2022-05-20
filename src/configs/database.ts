@@ -6,12 +6,7 @@ import { mongoUri } from '.';
 const TESTING = process.env.NODE_ENV === 'test';
 
 const ConnectDB = async () => {
-	const conn = await mongoose.connect(mongoUri as string, {
-		useNewUrlParser: true,
-		useCreateIndex: true,
-		useFindAndModify: false,
-		useUnifiedTopology: true,
-	});
+	const conn = await mongoose.connect(mongoUri as string);
 
 	!TESTING &&
 		console.log(

@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { UserDoc } from '../../interfaces/UserDoc';
 
-const UserSchema = new Schema<UserDoc>(
+const UserSchema = new Schema(
 	{
 		matricNumber: {
 			type: String,

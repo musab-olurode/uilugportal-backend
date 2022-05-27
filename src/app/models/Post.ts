@@ -15,8 +15,8 @@ const PostSchema = new Schema(
 		images: {
 			type: [String],
 			validate: [
-				(val: string[]) => val.length <= 2,
-				'{PATH} exceeds the limit of 2',
+				(val: string[]) => val.length <= 5,
+				'{PATH} exceeds the limit of 5',
 			],
 		},
 	},

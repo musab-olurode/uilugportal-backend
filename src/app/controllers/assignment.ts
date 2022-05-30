@@ -23,7 +23,6 @@ export const store = asyncHandler(async (req: Request, res: Response) => {
 		courseCode: 'required|string',
 		courseTitle: 'required|string',
 		topic: 'required|string',
-		file: 'required|file',
 	});
 
 	const assignmentData = req.validated();
@@ -43,7 +42,6 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
 		courseCode: 'required|string',
 		courseTitle: 'required|string',
 		topic: 'required|string',
-		file: 'file',
 	});
 
 	const assignmentData = req.validated();

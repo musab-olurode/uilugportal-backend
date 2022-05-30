@@ -23,7 +23,8 @@ export const store = asyncHandler(async (req: Request, res: Response) => {
 		courseCode: 'required|string',
 		courseTitle: 'required|string',
 		topic: 'required|string',
-		file: 'required|file',
+		file: 'required|array',
+		'file.*': 'required|file',
 	});
 
 	const { file, ...resourceData } = req.validated();
@@ -44,7 +45,8 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
 		courseCode: 'required|string',
 		courseTitle: 'required|string',
 		topic: 'required|string',
-		file: 'file',
+		file: 'array',
+		'file.*': 'file',
 	});
 
 	const { file, ...resourceData } = req.validated();

@@ -39,15 +39,15 @@ class ResourceService {
 			courseTitle: string;
 			topic: string;
 		},
-		file: UploadedFile | UploadedFile[]
+		file: UploadedFile[]
 	) {
-		if (Array.isArray(file)) {
+		if (file.length > MAX_FILES_PER_RESOURCE) {
 			throw new BadRequestError(
 				`Only a maximum of ${MAX_FILES_PER_RESOURCE} file is allowed`
 			);
 		}
 
-		const uploadedFile = await uploadFile(file, true, 'resources');
+		const uploadedFile = await uploadFile(file[0], true, 'resources');
 		const fileUrl = uploadedFile.url;
 
 		const resource = await Resource.create({
@@ -67,7 +67,7 @@ class ResourceService {
 			courseTitle: string;
 			topic: string;
 		},
-		file?: UploadedFile | UploadedFile[]
+		file?: UploadedFile[]
 	) {
 		let resource = await Resource.findById(resourceId);
 
@@ -82,13 +82,13 @@ class ResourceService {
 		}
 
 		if (file) {
-			if (Array.isArray(file)) {
+			if (file.length > MAX_FILES_PER_RESOURCE) {
 				throw new BadRequestError(
 					`Only a maximum of ${MAX_FILES_PER_RESOURCE} file is allowed`
 				);
 			}
 
-			const uploadedFile = await uploadFile(file, true, 'resources');
+			const uploadedFile = await uploadFile(file[0], true, 'resources');
 			(resourceData as any).file = uploadedFile.url;
 
 			await deleteUpload(resource.file);

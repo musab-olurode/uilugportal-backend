@@ -17,6 +17,7 @@ class ApiService {
 			method,
 			headers,
 			data: body,
+			timeout: 15000,
 		});
 
 		return response;

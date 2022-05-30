@@ -5,12 +5,12 @@ const fileHandler = (req: Request, res: Response, next: NextFunction) => {
 		const newFiles = { ...req.files };
 		Object.entries(newFiles).forEach(([key, file]) => {
 			if (!Array.isArray(file)) {
-				(file as any).isFile = true;
-			} else {
-				file.forEach((singleFile) => {
-					(singleFile as any).isFile = true;
-				});
+				file = [file];
+				newFiles[key] = file;
 			}
+			file.forEach((singleFile) => {
+				(singleFile as any).isFile = true;
+			});
 		});
 		req.files = newFiles;
 	}

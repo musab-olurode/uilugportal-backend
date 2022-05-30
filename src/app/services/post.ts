@@ -20,15 +20,11 @@ class PostService {
 	public static async createPost(
 		user: UserDoc,
 		text: string,
-		images?: UploadedFile | UploadedFile[]
+		images?: UploadedFile[]
 	) {
 		const imageUrls: string[] = [];
 
 		if (images) {
-			if (!Array.isArray(images)) {
-				images = [images];
-			}
-
 			if (images.length > MAX_IMAGES_PER_POST) {
 				throw new BadRequestError(
 					`Only a maximum of ${MAX_IMAGES_PER_POST} images are allowed`

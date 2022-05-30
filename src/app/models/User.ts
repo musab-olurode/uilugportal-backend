@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { UserDoc } from '../../interfaces/UserDoc';
+import { Role } from '../helpers/enums';
 
 const UserSchema = new Schema(
 	{
@@ -29,6 +30,11 @@ const UserSchema = new Schema(
 			type: String,
 			required: true,
 			enum: ['100', '200', '300', '400', '500'],
+		},
+		role: {
+			type: String,
+			enum: [Role.STUDENT, Role.CLASS_REP, Role.ASST_CLASS_REP],
+			default: Role.STUDENT,
 		},
 	},
 	{ timestamps: true }

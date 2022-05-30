@@ -18,3 +18,9 @@ export enum PageTitle {
 	PAYMENT_RECEIPTS = 'PAYMENT RECEIPTS',
 	COURSE_REGISTRATION = 'Instruction',
 }
+
+export enum Role {
+	STUDENT = 'STUDENT',
+	CLASS_REP = 'CLASS_REP',
+	ASST_CLASS_REP = 'ASST_CLASS_REP',
+}

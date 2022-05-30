@@ -5,8 +5,8 @@ import { NextFunction, Request, Response } from 'express';
 import { AuthFailureError, ForbiddenError } from '../../core/ApiError';
 import Jwt from '../../core/Jwt';
 import { jwtSecret } from '../../configs';
-import { UserDoc } from '../../interfaces/UserDoc';
 import User from '../models/User';
+import { Role } from '../helpers/enums';
 
 // Protect routes
 const protect = asyncHandler(
@@ -24,7 +24,7 @@ const protect = asyncHandler(
 		}
 		// Make sure token exists
 		if (!token) {
-			throw new AuthFailureError('Not authorized to access this route');
+			throw new AuthFailureError('Invalid authorization');
 		}
 
 		try {
@@ -32,11 +32,11 @@ const protect = asyncHandler(
 			const decoded = Jwt.verify(token, jwtSecret as string);
 			let sessionId: string = (decoded as any).phpSessId;
 			if (!sessionId) {
-				throw new AuthFailureError('session id missing from token');
+				throw new AuthFailureError('Session id missing from token');
 			}
 			const user = await User.findById((decoded as any)._id);
 			if (!user) {
-				throw new AuthFailureError('invalid user id');
+				throw new AuthFailureError('Invalid user id');
 			}
 			req.user = user;
 			req.sessionId = sessionId;
@@ -47,7 +47,7 @@ const protect = asyncHandler(
 			};
 			next();
 		} catch (err) {
-			throw new AuthFailureError('Not authorized to access this route');
+			throw new AuthFailureError('Invalid authorization');
 		}
 	}
 );
@@ -68,7 +68,7 @@ const admin = asyncHandler(
 		}
 		// Make sure token exists
 		if (!token) {
-			throw new AuthFailureError('Not authorized to access this route');
+			throw new AuthFailureError('Invalid authorization');
 		}
 
 		try {
@@ -81,7 +81,7 @@ const admin = asyncHandler(
 			req.admin = admin;
 			next();
 		} catch (err) {
-			throw new AuthFailureError('Not authorized to access this route');
+			throw new AuthFailureError('Invalid authorization');
 		}
 	}
 );
@@ -90,10 +90,20 @@ const admin = asyncHandler(
 const authorizeAdmin = (...roles: string[]) => {
 	return (req: Request, res: Response, next: NextFunction) => {
 		if (req.admin?._id) {
-			throw new ForbiddenError('Not authorized to access this route');
+			throw new ForbiddenError('Invalid authorization');
 		}
 		next();
 	};
 };
 
-export { protect, admin, authorizeAdmin };
+// Grant access to specific roles
+const authorize = (...roles: Role[]) => {
+	return (req: Request, res: Response, next: NextFunction) => {
+		if (!roles.includes(req.user!.role)) {
+			throw new AuthFailureError('Invalid authorization');
+		}
+		next();
+	};
+};
+
+export { protect, admin, authorizeAdmin, authorize };

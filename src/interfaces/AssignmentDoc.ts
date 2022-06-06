@@ -5,4 +5,6 @@ export interface AssignmentDoc extends Document {
 	courseCode: string;
 	courseTitle: string;
 	lecturer: string;
+	level: '100' | '200' | '300' | '400' | '500';
+	department: string;
 }

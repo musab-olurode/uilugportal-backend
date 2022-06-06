@@ -20,6 +20,15 @@ const AssignmentSchema = new Schema(
 			type: String,
 			required: true,
 		},
+		level: {
+			type: String,
+			required: true,
+			enum: ['100', '200', '300', '400', '500'],
+		},
+		department: {
+			type: String,
+			required: true,
+		},
 	},
 	{ timestamps: true }
 );

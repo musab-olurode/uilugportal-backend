@@ -23,12 +23,13 @@ export const store = asyncHandler(async (req: Request, res: Response) => {
 		courseCode: 'required|string',
 		courseTitle: 'required|string',
 		topic: 'required|string',
+		lecturer: 'required|string',
 	});
 
 	const assignmentData = req.validated();
 
 	const assignment = await AssignmentService.createAssignment(
-		req.user!._id,
+		req.user!,
 		assignmentData
 	);
 
@@ -42,6 +43,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
 		courseCode: 'required|string',
 		courseTitle: 'required|string',
 		topic: 'required|string',
+		lecturer: 'required|string',
 	});
 
 	const assignmentData = req.validated();
@@ -59,9 +61,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
 
 export const getUserAssignments = asyncHandler(
 	async (req: Request, res: Response) => {
-		const assignments = await AssignmentService.getUserAssignments(
-			req.user!._id
-		);
+		const assignments = await AssignmentService.getUserAssignments(req.user!);
 
 		return new SuccessResponse('assignments retrieved successfully', {
 			assignments,

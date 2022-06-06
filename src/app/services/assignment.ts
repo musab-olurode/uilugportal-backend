@@ -1,6 +1,8 @@
 import { Response } from 'express';
 import { Types } from 'mongoose';
 import { AuthFailureError, NotFoundError } from '../../core/ApiError';
+import { UserDoc } from '../../interfaces/UserDoc';
+import { Role } from '../helpers/enums';
 import Assignment from '../models/Assignment';
 
 class AssignmentService {
@@ -24,15 +26,23 @@ class AssignmentService {
 	}
 
 	public static async createAssignment(
-		userId: Types.ObjectId,
+		user: UserDoc,
 		assignmentData: {
 			courseCode: string;
 			courseTitle: string;
 			lecturer: string;
 		}
 	) {
+		if (user.role != Role.CLASS_REP && user.role != Role.ASST_CLASS_REP) {
+			throw new AuthFailureError(
+				'You are not authorized to create assignments'
+			);
+		}
+
 		const assignment = await Assignment.create({
-			user: userId,
+			user: user._id,
+			level: user.level,
+			department: user.department,
 			...assignmentData,
 		});
 
@@ -62,8 +72,11 @@ class AssignmentService {
 		return assignment;
 	}
 
-	public static async getUserAssignments(userId: Types.ObjectId) {
-		const assignments = await Assignment.find({ user: userId });
+	public static async getUserAssignments(user: UserDoc) {
+		const assignments = await Assignment.find({
+			level: user.level,
+			department: user.department,
+		});
 
 		return assignments;
 	}

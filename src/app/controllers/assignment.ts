@@ -24,6 +24,7 @@ export const store = asyncHandler(async (req: Request, res: Response) => {
 		courseTitle: 'required|string',
 		topic: 'required|string',
 		lecturer: 'required|string',
+		dueDate: 'required|date',
 	});
 
 	const assignmentData = req.validated();
@@ -44,6 +45,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
 		courseTitle: 'required|string',
 		topic: 'required|string',
 		lecturer: 'required|string',
+		dueDate: 'required|date',
 	});
 
 	const assignmentData = req.validated();
@@ -77,3 +79,34 @@ export const destroy = asyncHandler(async (req: Request, res: Response) => {
 
 	return new SuccessResponse('assignment deleted successfully', {}).send(res);
 });
+
+export const submit = asyncHandler(async (req: Request, res: Response) => {
+	await req.validate({
+		file: 'required|array',
+		'file.*': 'required|file',
+	});
+
+	const { file } = req.validated();
+
+	const assignment = await AssignmentService.submitAssignment(
+		req.params.assignmentId as unknown as Types.ObjectId,
+		file,
+		req.user!
+	);
+
+	return new SuccessResponse('assignment submitted successfully', {
+		assignment,
+	}).send(res);
+});
+
+export const getSubmittedAssignments = asyncHandler(
+	async (req: Request, res: Response) => {
+		const assignments = await AssignmentService.getSubmittedAssignments(
+			req.user!
+		);
+
+		return new SuccessResponse('submitted assignments retrieved successfully', {
+			assignments,
+		}).send(res);
+	}
+);

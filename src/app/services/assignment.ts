@@ -1,9 +1,16 @@
 import { Response } from 'express';
+import { UploadedFile } from 'express-fileupload';
 import { Types } from 'mongoose';
-import { AuthFailureError, NotFoundError } from '../../core/ApiError';
+import {
+	AuthFailureError,
+	ForbiddenError,
+	NotFoundError,
+} from '../../core/ApiError';
 import { UserDoc } from '../../interfaces/UserDoc';
 import { Role } from '../helpers/enums';
+import { uploadFile } from '../helpers/upload';
 import Assignment from '../models/Assignment';
+import SubmittedAssignment from '../models/SubmittedAssignment';
 
 class AssignmentService {
 	public static async getAssignments(res: Response) {
@@ -31,6 +38,7 @@ class AssignmentService {
 			courseCode: string;
 			courseTitle: string;
 			lecturer: string;
+			dueDate: string;
 		}
 	) {
 		if (user.role != Role.CLASS_REP && user.role != Role.ASST_CLASS_REP) {
@@ -56,6 +64,7 @@ class AssignmentService {
 			courseCode: string;
 			courseTitle: string;
 			lecturer: string;
+			dueDate: string;
 		}
 	) {
 		let assignment = await this.getAssignment(assignmentId);
@@ -94,6 +103,48 @@ class AssignmentService {
 		}
 
 		await assignment.remove();
+	}
+
+	public static async submitAssignment(
+		assignmentId: Types.ObjectId,
+		file: UploadedFile[],
+		user: UserDoc
+	) {
+		const assignment = await this.getAssignment(assignmentId);
+
+		if (assignment.dueDate < new Date()) {
+			throw new ForbiddenError(
+				'You cannot submit an assignment after the due date'
+			);
+		}
+
+		if (
+			assignment.department != user.department ||
+			assignment.level != user.level
+		) {
+			throw new ForbiddenError(
+				'You cannot submit an assignment for this course'
+			);
+		}
+
+		const uploadedFile = await uploadFile(file[0], true, 'assignments');
+
+		const submittedAssignment = await SubmittedAssignment.create({
+			user: user._id,
+			assignment: assignmentId,
+			file: uploadedFile.url,
+		});
+
+		return submittedAssignment;
+	}
+
+	public static async getSubmittedAssignments(user: UserDoc) {
+		const submittedAssignments = await Assignment.find({
+			level: user.level,
+			department: user.department,
+		}).populate('user', 'fullName avatar faculty department level');
+
+		return submittedAssignments;
 	}
 }
 

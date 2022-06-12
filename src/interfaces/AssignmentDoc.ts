@@ -7,4 +7,5 @@ export interface AssignmentDoc extends Document {
 	lecturer: string;
 	level: '100' | '200' | '300' | '400' | '500';
 	department: string;
+	dueDate: Date;
 }

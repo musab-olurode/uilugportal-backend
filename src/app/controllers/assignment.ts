@@ -71,6 +71,19 @@ export const getUserAssignments = asyncHandler(
 	}
 );
 
+export const getSingleUserAssignment = asyncHandler(
+	async (req: Request, res: Response) => {
+		const assignment = await AssignmentService.getSingleUserAssignment(
+			req.user!,
+			req.params.assignmentId as unknown as Types.ObjectId
+		);
+
+		return new SuccessResponse('assignment retrieved successfully', {
+			assignment,
+		}).send(res);
+	}
+);
+
 export const destroy = asyncHandler(async (req: Request, res: Response) => {
 	await AssignmentService.deleteAssignment(
 		req.user!._id,

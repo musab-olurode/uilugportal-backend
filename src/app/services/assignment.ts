@@ -90,6 +90,24 @@ class AssignmentService {
 		return assignments;
 	}
 
+	public static async getSingleUserAssignment(
+		user: UserDoc,
+		assignmentId: Types.ObjectId
+	) {
+		const assignment = await this.getAssignment(assignmentId);
+
+		if (
+			assignment.department != user.department ||
+			assignment.level != user.level
+		) {
+			throw new ForbiddenError(
+				'You are not authorized to view this assignment'
+			);
+		}
+
+		return assignment;
+	}
+
 	public static async deleteAssignment(
 		userId: Types.ObjectId,
 		assignmentId: Types.ObjectId

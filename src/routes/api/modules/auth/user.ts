@@ -1,5 +1,8 @@
 import express from 'express';
-import { getUserAssignments } from '../../../../app/controllers/assignment';
+import {
+	getSingleUserAssignment,
+	getUserAssignments,
+} from '../../../../app/controllers/assignment';
 import { getUserResources } from '../../../../app/controllers/resource';
 import { getUserSchedules } from '../../../../app/controllers/schedule';
 import {
@@ -16,5 +19,6 @@ router.get('/printables', getAllPrintables);
 router.get('/:userId/schedule', getUserSchedules);
 router.get('/:userId/resources', getUserResources);
 router.get('/:userId/assignments', getUserAssignments);
+router.get('/:userId/assignments/:assignmentId', getSingleUserAssignment);
 
 export default router;

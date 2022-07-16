@@ -6,6 +6,7 @@ import {
 	BadRequestError,
 	NotFoundError,
 } from '../../core/ApiError';
+import { PostDoc } from '../../interfaces/PostDoc';
 import { UserDoc } from '../../interfaces/UserDoc';
 import { deleteUpload, uploadFile } from '../helpers/upload';
 import Comment from '../models/Comment';
@@ -217,7 +218,7 @@ class PostService {
 
 		const post = aggregationResult[0];
 
-		return post;
+		return post as PostDoc;
 	}
 
 	public static async commentOnPost(
@@ -285,8 +286,8 @@ class PostService {
 	) {
 		const post = await this.getPost(postId, userId);
 
-		if (!userId.equals(post.user)) {
-			throw new AuthFailureError('You cannot delete this post');
+		if (!userId.equals(post.user._id)) {
+			throw new AuthFailureError('you are not authorized to delete this post');
 		}
 
 		if (post.images.length > 0) {
@@ -295,7 +296,7 @@ class PostService {
 			}
 		}
 
-		await post.remove();
+		await Post.deleteOne({ _id: postId });
 	}
 }
 

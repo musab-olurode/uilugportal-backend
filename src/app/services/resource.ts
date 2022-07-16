@@ -122,7 +122,7 @@ class ResourceService {
 			);
 		}
 
-		await resource.remove();
+		await Resource.deleteOne({ _id: resourceId });
 	}
 
 	public static async searchResources(req: Request, res: Response) {

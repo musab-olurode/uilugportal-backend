@@ -267,7 +267,7 @@ class PostService {
 		const isLike = userLike ? false : true;
 
 		if (userLike) {
-			await userLike.remove();
+			await Like.deleteOne({ _id: userLike._id });
 		} else {
 			await Like.create({
 				user: userId,

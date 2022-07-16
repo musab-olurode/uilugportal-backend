@@ -84,7 +84,7 @@ class ScheduleService {
 			throw new NotFoundError(`Schedule with id ${scheduleId} not found`);
 		}
 
-		await schedule.remove();
+		await Schedule.deleteOne({ _id: scheduleId });
 	}
 }
 

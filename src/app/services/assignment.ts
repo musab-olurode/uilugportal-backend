@@ -120,7 +120,7 @@ class AssignmentService {
 			);
 		}
 
-		await assignment.remove();
+		await Assignment.deleteOne({ _id: assignmentId });
 	}
 
 	public static async submitAssignment(

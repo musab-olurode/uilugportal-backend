@@ -157,10 +157,51 @@ class AssignmentService {
 	}
 
 	public static async getSubmittedAssignments(user: UserDoc) {
-		const submittedAssignments = await Assignment.find({
-			level: user.level,
-			department: user.department,
-		}).populate('user', 'fullName avatar faculty department level');
+		const submittedAssignments = await SubmittedAssignment.aggregate([
+			{
+				$lookup: {
+					from: 'assignments',
+					localField: 'assignment',
+					foreignField: '_id',
+					as: 'assignment',
+				},
+			},
+			{
+				$unwind: '$assignment',
+			},
+			{
+				$match: {
+					'assignment.level': user.level,
+					'assignment.department': user.department,
+				},
+			},
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'user',
+					foreignField: '_id',
+					as: 'user',
+				},
+			},
+			{
+				$unwind: '$user',
+			},
+			{
+				$project: {
+					_id: '$_id',
+					user: {
+						fullName: '$user.fullName',
+						avatar: '$user.avatar',
+						faculty: '$user.faculty',
+						department: '$user.department',
+						level: '$user.level',
+					},
+					assignment: '$assignment',
+					file: '$file',
+					createdAt: '$createdAt',
+				},
+			},
+		]);
 
 		return submittedAssignments;
 	}

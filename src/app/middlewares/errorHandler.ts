@@ -10,7 +10,7 @@ import {
 
 const TESTING = process.env.NODE_ENV === 'test';
 
-const files = new winston.transports.File({ filename: 'logs/error.log' });
+const files = new winston.transports.File({ filename: 'tmp/error.log' });
 winston.add(files);
 
 const errorHandler = (

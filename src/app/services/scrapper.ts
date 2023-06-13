@@ -171,7 +171,8 @@ class ScrapperService {
 			faculty: profileData[6].toString().trim(),
 			department: profileData[7].toString().trim(),
 			course: profileData[8].toString().trim(),
-			level: profileData[3].toString().trim() as IStudentProfile['level'],
+			level:
+				(profileData[3].toString().trim() as IStudentProfile['level']) || '400',
 			gender: profileData[9].toString().trim(),
 			address: profileData[10].toString().trim(),
 			studentEmail: profileData[11].toString().trim(),
@@ -183,9 +184,9 @@ class ScrapperService {
 			stateOfOrigin: profileData[17].toString().trim(),
 			lgaOfOrigin: profileData[18].toString().trim(),
 			levelAdviser: {
-				fullName: normalizeName(dashboardData[8].toString().trim()),
-				email: dashboardData[9].toString().trim(),
-				phoneNumber: dashboardData[10].toString().trim(),
+				fullName: normalizeName(dashboardData[8]?.toString().trim() || ''),
+				email: dashboardData[9]?.toString().trim() || '',
+				phoneNumber: dashboardData[10]?.toString().trim() || '',
 			},
 			nextOfKin: {
 				fullName: normalizeName(profileData[21].toString().trim()),

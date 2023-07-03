@@ -4,6 +4,7 @@ import { UserDoc } from '../../interfaces/UserDoc';
 import { IStudentProfile } from '../../interfaces/UserProfile';
 import User from '../models/User';
 import ScrapperService from './scrapper';
+import { Role } from '../helpers/enums';
 
 class AuthService {
 	public static async signin(matricNo: string, password: string) {
@@ -45,7 +46,10 @@ class AuthService {
 				user.department = studentProfile.department;
 				await user.save();
 			}
-			if (user.level !== studentProfile.level) {
+			if (
+				user.level !== studentProfile.level &&
+				parseInt(studentProfile.level) > parseInt(user.level)
+			) {
 				user.level = studentProfile.level;
 				await user.save();
 			}
@@ -57,6 +61,7 @@ class AuthService {
 				faculty: studentProfile.faculty,
 				department: studentProfile.department,
 				level: studentProfile.level,
+				role: Role.STUDENT,
 			});
 		}
 

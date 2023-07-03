@@ -59,7 +59,7 @@ const errorHandler = (
 			ApiError.handle(new NotFoundError('requested resource not found'), res);
 		}
 
-		winston.error(err.stack);
+		// winston.error(err.stack);
 
 		ApiError.handle(new InternalError(), res);
 	}

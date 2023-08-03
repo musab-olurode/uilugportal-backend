@@ -23,4 +23,5 @@ export enum Role {
 	STUDENT = 'STUDENT',
 	CLASS_REP = 'CLASS_REP',
 	ASST_CLASS_REP = 'ASST_CLASS_REP',
+	TEST_USER = 'TEST_USER',
 }

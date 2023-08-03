@@ -109,8 +109,6 @@ const validator = async (
 	customMessages?: ErrorMessages
 ) => {
 	const validation = new Validator(data, rules, customMessages);
-	validation.passes(() => callback(null, true));
-	validation.fails(() => callback(validation.errors, false));
 	validation.checkAsync(
 		() => callback(null, true),
 		() => callback(validation.errors, false)

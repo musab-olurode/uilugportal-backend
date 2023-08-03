@@ -14,8 +14,16 @@ import { IIdTokens } from '../../interfaces/IdTokens';
 import { obj } from '../../interfaces/obj';
 import { IReceipt } from '../../interfaces/Receipt';
 import { IResult } from '../../interfaces/Result';
-import { IStudentProfile } from '../../interfaces/UserProfile';
-import { normalizeName } from '../helpers/constants';
+import {
+	IStudentProfile,
+	IStudentProfileSummary,
+	Level,
+} from '../../interfaces/UserProfile';
+import {
+	INVALID_CREDENTIALS_PORTAL_MESSAGE,
+	MULTIPLE_SESSION_PORTAL_MESSAGE,
+	normalizeName,
+} from '../helpers/constants';
 import { PageTitle, RequestMethod } from '../helpers/enums';
 import ApiService from './api';
 import * as fs from 'fs';
@@ -32,7 +40,10 @@ class ScrapperService {
 		throw new InternalError(message);
 	}
 
-	public static async login(matricNumber: string, password: string) {
+	public static async login(
+		matricNumber: string,
+		password: string
+	): Promise<string> {
 		const payload = {
 			username: matricNumber,
 			password,
@@ -51,36 +62,31 @@ class ScrapperService {
 		const portalResponseMessage = $('font').text();
 		const portalResponseContents = $('script').contents();
 
-		if (portalResponseMessage === 'Invalid login parameters') {
+		if (portalResponseMessage === INVALID_CREDENTIALS_PORTAL_MESSAGE) {
 			throw new AuthFailureError('Invalid credentials');
 		}
 
-		if (
-			portalResponseMessage ===
-			'You can not have multiple sessions for your profile.'
-		) {
+		if (portalResponseMessage === MULTIPLE_SESSION_PORTAL_MESSAGE) {
 			throw new ForbiddenError(portalResponseMessage);
 		}
 
-		if (
+		const isSuccessfulPortalResponse =
 			portalResponseContents.length > 0 &&
 			// eslint-disable-next-line quotes
-			portalResponseContents[0].data?.trim() === "location='main.php';"
-		) {
-			const cookies = portalResponse.headers['set-cookie'];
-			const sessionId = cookies?.[0].split(';')[0].split('=')[1];
+			portalResponseContents[0].data?.trim() === "location='main.php';";
 
-			if (!sessionId) {
-				this.handleFallback(
-					portalResponse.data,
-					'Cookie is missing from response'
-				);
-			}
-
-			return sessionId;
+		if (!isSuccessfulPortalResponse) {
+			throw new InternalError('Invalid response from portal');
 		}
 
-		this.handleFallback(portalResponse.data);
+		const cookies = portalResponse.headers['set-cookie'];
+		const sessionId = cookies?.[0].split(';')[0].split('=')[1];
+
+		if (!sessionId) {
+			throw new InternalError('Cookie is missing from response');
+		}
+
+		return sessionId;
 	}
 
 	public static async getDashboardPage(sessionId: string) {
@@ -94,39 +100,62 @@ class ScrapperService {
 		return dashboardPage;
 	}
 
-	public static getIdTokens(dashboard: string) {
+	public static getProfileSummary(dashboard: string) {
 		const idTokens: IIdTokens = {
 			r_val: '',
 			id: '',
 			p_id: '',
 		};
+		const profileTableValues: string[] = [];
 
-		let $dashboard = cheerio.load(dashboard);
+		const $ = cheerio.load(dashboard);
 
-		$dashboard('[title="PERSONAL SETUP"]')
-			.find('a')
-			.map((i, el) => {
-				let item = $dashboard(el).attr('href');
-				let params = item?.toString().split('?')[1];
-				let firstValues = params?.split('&');
-				if (i === 1) {
-					idTokens.r_val = firstValues?.[0].split('r_val=')[1] as string;
-					idTokens.id = firstValues?.[1].split('id=')[1] as string;
-				} else if (i === 2) {
-					idTokens.p_id = firstValues?.[1].split('p_id=')[1] as string;
-				}
-			});
+		const profileLink = $('a[href*=personal_details.php]').attr('href')!!;
+		const passwordManagementLink = $('a[href*=page.php]').attr('href')!!;
+		const relativeAvatarUrl = $('fieldset img').attr('src')!!;
+		$('table tbody tr').each((index, row) => {
+			const cells = $(row).find('td');
+			const rowValues = cells.map((_, cell) => $(cell).text().trim()).get();
+			profileTableValues.push(...rowValues);
+		});
+		// eslint-disable-next-line quotes
+		const semester = $("[color='green']")
+			.map((i, elem) => {
+				if (i === 3) return $(elem).text();
+			})
+			.toArray();
 
-		return idTokens;
+		idTokens.r_val = profileLink.split('&')[0].split('=')[1];
+		idTokens.id = profileLink.split('&')[1].split('=')[1];
+		idTokens.p_id = passwordManagementLink.split('&')[1].split('=')[1];
+		const avatarUrl = `${unilorinPortalUrl}/${relativeAvatarUrl}`;
+		const session = semester[0].toString().split(' ')[3].trim();
+
+		const profileSummary: IStudentProfileSummary = {
+			avatar: avatarUrl,
+			matricNumber: profileTableValues[0],
+			fullName: normalizeName(profileTableValues[2]),
+			faculty: profileTableValues[3],
+			department: profileTableValues[4],
+			course: profileTableValues[5],
+			level: profileTableValues[6] as Level,
+			session,
+		};
+
+		return { idTokens, profile: profileSummary };
 	}
 
-	public static async getUserProfile(
+	public static async getFullUserProfile(
 		sessionId: string,
-		idTokens: IIdTokens,
+		idTokens?: IIdTokens,
 		dashboardPage?: string
 	) {
 		if (!dashboardPage) {
 			dashboardPage = (await this.getDashboardPage(sessionId)) as string;
+		}
+
+		if (!idTokens) {
+			idTokens = this.getProfileSummary(dashboardPage).idTokens;
 		}
 
 		const profilePage = await this.getPage(
@@ -223,24 +252,13 @@ class ScrapperService {
 			contentvar: 'logout',
 		};
 
-		const logoutPage = await this.getPage(
+		await this.getPage(
 			'scriptfile_a.php',
 			sessionId,
 			RequestMethod.POST,
 			undefined,
 			payload
 		);
-
-		const $logout = cheerio.load(logoutPage);
-
-		if (
-			$logout('script').contents().length === 0 &&
-			$logout('script').contents()[0].data?.trim() !==
-				// eslint-disable-next-line quotes
-				"document.location='index.php';"
-		) {
-			throw new InternalError('Failed to signout');
-		}
 	}
 
 	private static async getResultsPage(sessionId: string, session: string) {
@@ -607,36 +625,19 @@ class ScrapperService {
 				'utf8'
 			)
 		);
+		const profileTableValues: string[] = [];
 
-		const newsArray: any[] = [];
+		let hrefValue: string | null = null;
 
-		$('.col-lg-4.col-md-4').map((i, col) => {
-			$(col)
-				.map((i2, news) => {
-					let link = $(news).find('a').attr('href');
-					let image = '';
-					let newsSummary = $(news).find('.summary').find('b');
-					let title = $(newsSummary[0]).text();
-					let date = {
-						day: '',
-						month: '',
-					};
-
-					newsArray.push({
-						link,
-						image,
-						title,
-						date,
-					});
-				})
-				.toArray();
+		$('a[href*=personal_details.php]').each((index, element) => {
+			const href = $(element).attr('href');
+			if (href) {
+				hrefValue = href;
+				return false; // Exit the loop early if we found a match
+			}
 		});
 
-		const pageNumberArray = $('.leading-5').find('.font-medium').toArray();
-		//get the contents of the last pagination button
-		const totalPages = $(pageNumberArray[pageNumberArray.length - 1]).text();
-
-		return { totalPages, news: newsArray };
+		return { hrefValue };
 	}
 }
 

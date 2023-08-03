@@ -40,11 +40,6 @@ const protect = asyncHandler(
 			}
 			req.user = user;
 			req.sessionId = sessionId;
-			req.idTokens = {
-				r_val: (decoded as any).r_val,
-				id: (decoded as any).id,
-				p_id: (decoded as any).p_id,
-			};
 			next();
 		} catch (err) {
 			throw new AuthFailureError('Invalid authorization');

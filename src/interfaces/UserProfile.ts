@@ -1,15 +1,19 @@
 import { UserDoc } from './UserDoc';
 
-export interface IStudentProfile {
+export type Level = '100' | '200' | '300' | '400' | '500';
+export interface IStudentProfileSummary {
 	avatar: string;
-	signature?: string;
 	matricNumber: string;
 	fullName: string;
-	session: string;
 	faculty: string;
 	department: string;
 	course: string;
-	level: '100' | '200' | '300' | '400' | '500';
+	level: Level;
+	session: string;
+}
+
+export interface IStudentProfile extends IStudentProfileSummary {
+	signature?: string;
 	gender: string;
 	address: string;
 	studentEmail: string;

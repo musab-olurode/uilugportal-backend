@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { SuccessResponse } from '../../core/ApiResponse';
-import { IIdTokens } from '../../interfaces/IdTokens';
 import { getSessionsAsString } from '../helpers/constants';
 import asyncHandler from '../middlewares/async';
 import UserService from '../services/user';
@@ -51,10 +50,16 @@ export const getAllPrintables = asyncHandler(
 		const { session, currentLevel, levelForCourseForm, matricNumber } =
 			req.query;
 
+		const idTokens = {
+			r_val: req.user!.idTokens.rVal,
+			id: req.user!.idTokens.id,
+			p_id: req.user!.idTokens.pId,
+		};
+
 		const printables = await UserService.getPrintables(
 			req.sessionId as string,
 			session as string,
-			req.idTokens as IIdTokens,
+			idTokens,
 			Number(currentLevel),
 			Number(levelForCourseForm),
 			matricNumber as string

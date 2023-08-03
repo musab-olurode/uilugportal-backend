@@ -1,91 +1,78 @@
 import { Types } from 'mongoose';
-import { IIdTokens } from '../../interfaces/IdTokens';
 import { UserDoc } from '../../interfaces/UserDoc';
-import { IStudentProfile } from '../../interfaces/UserProfile';
 import User from '../models/User';
 import ScrapperService from './scrapper';
 import { Role } from '../helpers/enums';
-import {
-	TEST_USER,
-	TEST_USER_ID_TOKENS,
-	TEST_USER_SESSION_ID,
-} from '../helpers/constants';
+import { TEST_USER, TEST_USER_SESSION_ID } from '../helpers/constants';
 import { testAccountPassword } from '../../configs';
 import { AuthFailureError } from '../../core/ApiError';
 
 class AuthService {
 	public static async signin(matricNo: string, password: string) {
 		if (matricNo === TEST_USER.matricNumber) {
-			return this.signinTestUser(password);
+			return await this.signinTestUser(password);
 		}
 
-		const sessionId = (await ScrapperService.login(
-			matricNo,
-			password
-		)) as string;
+		const sessionId = await ScrapperService.login(matricNo, password);
 
-		const dashboardPage = (await ScrapperService.getDashboardPage(
-			sessionId
-		)) as string;
+		const userProfile = await this.findOrCreateUser(matricNo, sessionId);
 
-		const idTokens = await ScrapperService.getIdTokens(dashboardPage);
-
-		const studentProfile = await ScrapperService.getUserProfile(
+		return {
 			sessionId,
-			idTokens,
-			dashboardPage
-		);
-
-		const userProfile = await this.findOrCreateUser(studentProfile);
-
-		const user = { ...studentProfile, user: userProfile };
-
-		return { sessionId, idTokens, user };
+			user: userProfile,
+		};
 	}
 
-	private static signinTestUser(password: string) {
+	private static async signinTestUser(password: string) {
 		if (password !== testAccountPassword) {
 			throw new AuthFailureError('Invalid credentials');
 		}
 
+		const user = await User.findOne({
+			matricNumber: TEST_USER.matricNumber,
+		});
+
 		return {
 			sessionId: TEST_USER_SESSION_ID,
-			idTokens: TEST_USER_ID_TOKENS,
-			user: TEST_USER,
+			user: user!,
 		};
 	}
 
-	private static async findOrCreateUser(studentProfile: IStudentProfile) {
+	private static async findOrCreateUser(
+		matricNumber: string,
+		sessionId: string
+	) {
 		let user = await User.findOne({
-			matricNumber: studentProfile.matricNumber,
+			matricNumber,
 		});
 
-		if (user) {
-			if (user.faculty !== studentProfile.faculty) {
-				user.faculty = studentProfile.faculty;
-				await user.save();
-			}
-			if (user.department !== studentProfile.department) {
-				user.department = studentProfile.department;
-				await user.save();
-			}
-			if (
-				user.level !== studentProfile.level &&
-				parseInt(studentProfile.level) > parseInt(user.level)
-			) {
-				user.level = studentProfile.level;
-				await user.save();
-			}
-		} else {
+		if (!user) {
+			const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
+			const { profile, idTokens } =
+				ScrapperService.getProfileSummary(dashboardPage);
+
 			user = await User.create({
-				matricNumber: studentProfile.matricNumber,
-				fullName: studentProfile.fullName,
-				avatar: studentProfile.avatar,
-				faculty: studentProfile.faculty,
-				department: studentProfile.department,
-				level: studentProfile.level,
+				matricNumber: profile.matricNumber,
+				fullName: profile.fullName,
+				avatar: profile.avatar,
+				faculty: profile.faculty,
+				department: profile.department,
+				level: profile.level,
 				role: Role.STUDENT,
+				r_val: idTokens.r_val,
 			});
+		}
+
+		if (!user.idTokens.rVal) {
+			const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
+			const { idTokens } = ScrapperService.getProfileSummary(dashboardPage);
+
+			user!.idTokens = {
+				rVal: idTokens.r_val,
+				id: idTokens.id,
+				pId: idTokens.p_id,
+			};
+			await user!.save();
 		}
 
 		return user as UserDoc;
@@ -93,7 +80,6 @@ class AuthService {
 
 	public static async getLoggedInUser(
 		sessionId: string,
-		idTokens: IIdTokens,
 		userId: Types.ObjectId
 	) {
 		const userProfile = await User.findById(userId);
@@ -105,10 +91,7 @@ class AuthService {
 			const { user, ...rest } = TEST_USER;
 			studentProfile = rest;
 		} else {
-			studentProfile = await ScrapperService.getUserProfile(
-				sessionId,
-				idTokens
-			);
+			studentProfile = await ScrapperService.getFullUserProfile(sessionId);
 		}
 
 		const user = { ...studentProfile, user: userProfile };

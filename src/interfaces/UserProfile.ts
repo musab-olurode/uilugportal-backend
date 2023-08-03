@@ -1,3 +1,5 @@
+import { UserDoc } from './UserDoc';
+
 export interface IStudentProfile {
 	avatar: string;
 	signature?: string;
@@ -47,4 +49,8 @@ export interface IStudentProfile {
 		number: string;
 		year: string;
 	};
+}
+
+export interface IUser extends IStudentProfile {
+	user: UserDoc;
 }

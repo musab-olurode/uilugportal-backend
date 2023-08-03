@@ -33,7 +33,7 @@ const UserSchema = new Schema(
 		},
 		role: {
 			type: String,
-			enum: [Role.STUDENT, Role.CLASS_REP, Role.ASST_CLASS_REP],
+			enum: [Role.STUDENT, Role.CLASS_REP, Role.ASST_CLASS_REP, Role.TEST_USER],
 			default: Role.STUDENT,
 		},
 	},

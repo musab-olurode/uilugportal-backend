@@ -13,3 +13,5 @@ export const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET;
 export const teamPlatoUrl = process.env.TEAM_PLATO_URL;
 export const teamBabsUrl = process.env.TEAM_BABS_URL;
 export const unilorinSuUrl = process.env.UNILORIN_SU_URL;
+export const testAccountMatricNumber = process.env.TEST_ACCOUNT_MATRIC_NO;
+export const testAccountPassword = process.env.TEST_ACCOUNT_PASSWORD;

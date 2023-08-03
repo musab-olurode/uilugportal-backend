@@ -5,9 +5,20 @@ import { IStudentProfile } from '../../interfaces/UserProfile';
 import User from '../models/User';
 import ScrapperService from './scrapper';
 import { Role } from '../helpers/enums';
+import {
+	TEST_USER,
+	TEST_USER_ID_TOKENS,
+	TEST_USER_SESSION_ID,
+} from '../helpers/constants';
+import { testAccountPassword } from '../../configs';
+import { AuthFailureError } from '../../core/ApiError';
 
 class AuthService {
 	public static async signin(matricNo: string, password: string) {
+		if (matricNo === TEST_USER.matricNumber) {
+			return this.signinTestUser(password);
+		}
+
 		const sessionId = (await ScrapperService.login(
 			matricNo,
 			password
@@ -30,6 +41,18 @@ class AuthService {
 		const user = { ...studentProfile, user: userProfile };
 
 		return { sessionId, idTokens, user };
+	}
+
+	private static signinTestUser(password: string) {
+		if (password !== testAccountPassword) {
+			throw new AuthFailureError('Invalid credentials');
+		}
+
+		return {
+			sessionId: TEST_USER_SESSION_ID,
+			idTokens: TEST_USER_ID_TOKENS,
+			user: TEST_USER,
+		};
 	}
 
 	private static async findOrCreateUser(studentProfile: IStudentProfile) {
@@ -73,12 +96,20 @@ class AuthService {
 		idTokens: IIdTokens,
 		userId: Types.ObjectId
 	) {
-		const studentProfile = await ScrapperService.getUserProfile(
-			sessionId,
-			idTokens
-		);
-
 		const userProfile = await User.findById(userId);
+
+		let studentProfile;
+
+		if (userProfile!.role === Role.TEST_USER) {
+			// eslint-disable-next-line no-unused-vars
+			const { user, ...rest } = TEST_USER;
+			studentProfile = rest;
+		} else {
+			studentProfile = await ScrapperService.getUserProfile(
+				sessionId,
+				idTokens
+			);
+		}
 
 		const user = { ...studentProfile, user: userProfile };
 
@@ -86,7 +117,9 @@ class AuthService {
 	}
 
 	public static async signout(sessionId: string) {
-		await ScrapperService.signout(sessionId);
+		if (sessionId !== TEST_USER_SESSION_ID) {
+			await ScrapperService.signout(sessionId);
+		}
 	}
 }
 

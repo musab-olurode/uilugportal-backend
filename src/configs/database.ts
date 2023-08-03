@@ -6,7 +6,7 @@ import { Server } from 'http';
 
 const TESTING = process.env.NODE_ENV === 'test';
 
-const ConnectDB = async (serverListener: () => Server) => {
+const ConnectDB = async (serverListener: () => void) => {
 	const conn = await mongoose.connect(mongoUri as string);
 
 	!TESTING &&

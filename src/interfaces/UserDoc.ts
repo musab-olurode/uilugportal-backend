@@ -9,4 +9,9 @@ export interface UserDoc extends Document {
 	faculty: string;
 	level: '100' | '200' | '300' | '400' | '500';
 	role: Role;
+	idTokens: {
+		rVal: string;
+		id: string;
+		pId: string;
+	};
 }

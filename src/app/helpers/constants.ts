@@ -124,7 +124,7 @@ const TEST_USER: IUser = {
 	},
 	stateOfOrigin: 'Placeholder State',
 	studentEmail: 'placeholderstudent@eamil.com',
-	studentShipStatus: 'Undergraduate',
+	studentShipStatus: 'Returning',
 	user: {
 		matricNumber: testAccountMatricNumber!!,
 		fullName: 'John Doe',
@@ -135,6 +135,10 @@ const TEST_USER: IUser = {
 		level: '100',
 	} as UserDoc,
 };
+
+const INVALID_CREDENTIALS_PORTAL_MESSAGE = 'Invalid login parameters';
+const MULTIPLE_SESSION_PORTAL_MESSAGE =
+	'You can not have multiple sessions for your profile.';
 
 export {
 	generateString,
@@ -148,4 +152,6 @@ export {
 	TEST_USER,
 	TEST_USER_SESSION_ID,
 	TEST_USER_ID_TOKENS,
+	MULTIPLE_SESSION_PORTAL_MESSAGE,
+	INVALID_CREDENTIALS_PORTAL_MESSAGE,
 };

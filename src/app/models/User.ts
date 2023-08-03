@@ -36,6 +36,20 @@ const UserSchema = new Schema(
 			enum: [Role.STUDENT, Role.CLASS_REP, Role.ASST_CLASS_REP, Role.TEST_USER],
 			default: Role.STUDENT,
 		},
+		idTokens: {
+			rVal: {
+				type: String,
+				required: true,
+			},
+			id: {
+				type: String,
+				required: true,
+			},
+			pId: {
+				type: String,
+				required: true,
+			},
+		},
 	},
 	{ timestamps: true }
 );

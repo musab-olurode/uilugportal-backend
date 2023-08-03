@@ -3,7 +3,6 @@ declare namespace Express {
 	interface Request {
 		user?: import('../../src/interfaces/UserDoc').UserDoc;
 		sessionId?: string;
-		idTokens?: import('../../src/interfaces/IdTokens').IIdTokens;
 		admin?: import('../../src/interfaces/AdminDoc').AdminDoc;
 		validate: (
 			args: import('validatorjs').Rules,

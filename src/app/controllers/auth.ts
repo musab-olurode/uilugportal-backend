@@ -2,10 +2,10 @@
 import asyncHandler from '../middlewares/async';
 import { Request, Response } from 'express';
 import Jwt from '../../core/Jwt';
-import { IIdTokens } from '../../interfaces/IdTokens';
 import { jwtCookieExpire } from '../../configs';
 import AuthService from '../services/auth';
 import { SuccessResponse } from '../../core/ApiResponse';
+import { UserDoc } from '../../interfaces/UserDoc';
 
 export const signin = asyncHandler(async (req: Request, res: Response) => {
 	await req.validate({
@@ -15,19 +15,9 @@ export const signin = asyncHandler(async (req: Request, res: Response) => {
 
 	const { matricNumber, password } = req.validated();
 
-	const { sessionId, idTokens, user } = await AuthService.signin(
-		matricNumber,
-		password
-	);
+	const { sessionId, user } = await AuthService.signin(matricNumber, password);
 
-	return sendTokenResponse(
-		res,
-		sessionId,
-		idTokens,
-		user,
-		200,
-		'signed in successfully'
-	);
+	return sendTokenResponse(res, sessionId, user, 200, 'signed in successfully');
 });
 
 export const signout = asyncHandler(async (req: Request, res: Response) => {
@@ -41,9 +31,25 @@ export const getLoggedInUser = asyncHandler(
 	async (req: Request, res: Response) => {
 		const user = await AuthService.getLoggedInUser(
 			req.sessionId as string,
-			req.idTokens as IIdTokens,
 			req.user!._id
 		);
+
+		if (req.user!.faculty !== user.faculty) {
+			req.user!.faculty = user.faculty;
+		}
+		if (req.user!.department !== user.department) {
+			req.user!.department = user.department;
+		}
+		if (
+			req.user!.level !== user.level &&
+			parseInt(user.level) > parseInt(req.user!.level)
+		) {
+			req.user!.level = user.level;
+		}
+
+		if (req.user!.isModified()) {
+			await req.user!.save();
+		}
 
 		return new SuccessResponse('data retrieved', { user }).send(res);
 	}
@@ -53,12 +59,11 @@ export const getLoggedInUser = asyncHandler(
 const sendTokenResponse = (
 	res: Response,
 	sessionId: string,
-	idTokens: IIdTokens,
-	user: any,
+	user: UserDoc,
 	statusCode: number = 200,
 	message?: string
 ) => {
-	const token = Jwt.issue(sessionId, idTokens, user.user._id);
+	const token = Jwt.issue(sessionId, user._id);
 
 	const options = {
 		expires: new Date(

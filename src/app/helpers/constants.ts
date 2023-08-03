@@ -79,7 +79,7 @@ const TEST_USER_ID_TOKENS: IIdTokens = {
 const TEST_USER: IUser = {
 	address: '11, Hikory Lane, Wakanda',
 	avatar: 'https://i.pravatar.cc/300',
-	chargesPaid: true,
+	chargesPaid: 'Yes',
 	course: 'Bsc. Computer Science',
 	department: 'Computer Science',
 	dateOfBirth: new Date().toISOString(),

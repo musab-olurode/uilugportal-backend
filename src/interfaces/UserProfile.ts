@@ -20,7 +20,7 @@ export interface IStudentProfile extends IStudentProfileSummary {
 	phoneNumber: string;
 	modeOfEntry: string;
 	studentShipStatus: string;
-	chargesPaid: boolean;
+	chargesPaid: string;
 	dateOfBirth: string;
 	stateOfOrigin: string;
 	lgaOfOrigin: string;

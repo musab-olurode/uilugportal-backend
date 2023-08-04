@@ -30,6 +30,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as chrono from 'chrono-node';
 import INews from '../../interfaces/News';
+import { UserDoc } from '../../interfaces/UserDoc';
 
 class ScrapperService {
 	private static handleFallback(
@@ -145,17 +146,21 @@ class ScrapperService {
 		return { idTokens, profile: profileSummary };
 	}
 
-	public static async getFullUserProfile(
-		sessionId: string,
-		idTokens?: IIdTokens,
-		dashboardPage?: string
-	) {
-		if (!dashboardPage) {
-			dashboardPage = (await this.getDashboardPage(sessionId)) as string;
-		}
+	public static async getFullUserProfile(sessionId: string, user: UserDoc) {
+		const dashboardPage = await this.getDashboardPage(sessionId);
+		const idTokens = this.getProfileSummary(dashboardPage).idTokens;
 
-		if (!idTokens) {
-			idTokens = this.getProfileSummary(dashboardPage).idTokens;
+		if (user.idTokens.rVal != idTokens.r_val) {
+			user.idTokens.rVal = idTokens.r_val;
+		}
+		if (user.idTokens.pId != idTokens.p_id) {
+			user.idTokens.pId = idTokens.p_id;
+		}
+		if (user.idTokens.id != idTokens.id) {
+			user.idTokens.id = idTokens.id;
+		}
+		if (user.isModified()) {
+			await user.save();
 		}
 
 		const profilePage = await this.getPage(

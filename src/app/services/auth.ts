@@ -59,7 +59,11 @@ class AuthService {
 				department: profile.department,
 				level: profile.level,
 				role: Role.STUDENT,
-				r_val: idTokens.r_val,
+				idTokens: {
+					rVal: idTokens.r_val,
+					id: idTokens.id,
+					pId: idTokens.p_id,
+				},
 			});
 		}
 
@@ -67,7 +71,7 @@ class AuthService {
 			const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
 			const { idTokens } = ScrapperService.getProfileSummary(dashboardPage);
 
-			user!.idTokens = {
+			user.idTokens = {
 				rVal: idTokens.r_val,
 				id: idTokens.id,
 				pId: idTokens.p_id,
@@ -91,7 +95,10 @@ class AuthService {
 			const { user, ...rest } = TEST_USER;
 			studentProfile = rest;
 		} else {
-			studentProfile = await ScrapperService.getFullUserProfile(sessionId);
+			studentProfile = await ScrapperService.getFullUserProfile(
+				sessionId,
+				userProfile!
+			);
 		}
 
 		const user = { ...studentProfile, user: userProfile };

@@ -13,7 +13,8 @@ class AuthService {
 			return await this.signinTestUser(password);
 		}
 
-		const sessionId = await ScrapperService.login(matricNo, password);
+		const sessionId = '';
+		// const sessionId = await ScrapperService.login(matricNo, password);
 
 		const userProfile = await this.findOrCreateUser(matricNo, sessionId);
 
@@ -46,47 +47,42 @@ class AuthService {
 			matricNumber,
 		});
 
-		// First time login
-		if (!user) {
-			const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
-			const { profile, idTokens } =
-				ScrapperService.getProfileSummary(dashboardPage);
+		// // First time login
+		// if (!user) {
+		// 	const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
+		// 	const { profile, idTokens } =
+		// 		ScrapperService.getProfileSummary(dashboardPage);
 
-			user = await User.create({
-				matricNumber: profile.matricNumber,
-				fullName: profile.fullName,
-				avatar: profile.avatar,
-				faculty: profile.faculty,
-				department: profile.department,
-				level: profile.level,
-				role: Role.STUDENT,
-				levelAdviser: profile.levelAdviser,
-				semester: profile.semester,
-				idTokens,
-			});
-		}
+		// 	user = await User.create({
+		// 		matricNumber: profile.matricNumber,
+		// 		fullName: profile.fullName,
+		// 		avatar: profile.avatar,
+		// 		faculty: profile.faculty,
+		// 		department: profile.department,
+		// 		level: profile.level,
+		// 		role: Role.STUDENT,
+		// 		levelAdviser: profile.levelAdviser,
+		// 		semester: profile.semester,
+		// 		idTokens,
+		// 	});
+		// }
 
-		// Existing users without new profile data
-		if (!user.idTokens.rVal) {
-			const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
-			const { idTokens, profile } =
-				ScrapperService.getProfileSummary(dashboardPage);
+		// // Existing users without new profile data
+		// if (!user.idTokens.rVal) {
+		// 	const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
+		// 	const { idTokens, profile } =
+		// 		ScrapperService.getProfileSummary(dashboardPage);
 
-			user.levelAdviser = profile.levelAdviser;
-			user.semester = profile.semester;
-			user.idTokens = idTokens;
-			await user!.save();
-		}
+		// 	user.levelAdviser = profile.levelAdviser;
+		// 	user.semester = profile.semester;
+		// 	user.idTokens = idTokens;
+		// 	await user!.save();
+		// }
 
 		return user as UserDoc;
 	}
 
-	public static async getLoggedInUser(
-		sessionId: string,
-		userId: Types.ObjectId
-	) {
-		const userProfile = await User.findById(userId);
-
+	public static async getLoggedInUser(sessionId: string, userProfile: UserDoc) {
 		let studentProfile;
 
 		if (userProfile!.role === Role.TEST_USER) {

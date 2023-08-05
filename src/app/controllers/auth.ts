@@ -31,7 +31,7 @@ export const getLoggedInUser = asyncHandler(
 	async (req: Request, res: Response) => {
 		const user = await AuthService.getLoggedInUser(
 			req.sessionId as string,
-			req.user!._id
+			req.user!
 		);
 
 		if (req.user!.faculty !== user.faculty) {

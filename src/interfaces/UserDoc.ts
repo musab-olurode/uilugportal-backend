@@ -1,5 +1,6 @@
 import { Document } from 'mongoose';
 import { Role } from '../app/helpers/enums';
+import { IIdTokens } from './IdTokens';
 
 export interface UserDoc extends Document {
 	matricNumber: string;
@@ -9,9 +10,15 @@ export interface UserDoc extends Document {
 	faculty: string;
 	level: '100' | '200' | '300' | '400' | '500';
 	role: Role;
-	idTokens: {
-		rVal: string;
-		id: string;
-		pId: string;
+	levelAdviser: {
+		fullName: string;
+		email: string;
+		phoneNumber: string;
 	};
+	semester: {
+		type: string;
+		session: string;
+		number: string;
+	};
+	idTokens: IIdTokens;
 }

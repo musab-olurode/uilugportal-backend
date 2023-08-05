@@ -3,6 +3,7 @@ import { SuccessResponse } from '../../core/ApiResponse';
 import { getSessionsAsString } from '../helpers/constants';
 import asyncHandler from '../middlewares/async';
 import UserService from '../services/user';
+import { IIdTokens } from '../../interfaces/IdTokens';
 
 export const getResult = asyncHandler(async (req: Request, res: Response) => {
 	const sessionsAsString = getSessionsAsString();
@@ -50,11 +51,7 @@ export const getAllPrintables = asyncHandler(
 		const { session, currentLevel, levelForCourseForm, matricNumber } =
 			req.query;
 
-		const idTokens = {
-			r_val: req.user!.idTokens.rVal,
-			id: req.user!.idTokens.id,
-			p_id: req.user!.idTokens.pId,
-		};
+		const idTokens = req.user!.idTokens;
 
 		const printables = await UserService.getPrintables(
 			req.sessionId as string,

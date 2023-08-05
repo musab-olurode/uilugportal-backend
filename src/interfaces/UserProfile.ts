@@ -9,7 +9,16 @@ export interface IStudentProfileSummary {
 	department: string;
 	course: string;
 	level: Level;
-	session: string;
+	levelAdviser: {
+		fullName: string;
+		email: string;
+		phoneNumber: string;
+	};
+	semester: {
+		type: string;
+		session: string;
+		number: string;
+	};
 }
 
 export interface IStudentProfile extends IStudentProfileSummary {
@@ -24,11 +33,6 @@ export interface IStudentProfile extends IStudentProfileSummary {
 	dateOfBirth: string;
 	stateOfOrigin: string;
 	lgaOfOrigin: string;
-	levelAdviser: {
-		fullName: string;
-		email: string;
-		phoneNumber: string;
-	};
 	nextOfKin: {
 		fullName: string;
 		address: string;
@@ -47,11 +51,6 @@ export interface IStudentProfile extends IStudentProfileSummary {
 		address: string;
 		phoneNumber: string;
 		email: string;
-	};
-	semester: {
-		type: string;
-		number: string;
-		year: string;
 	};
 }
 

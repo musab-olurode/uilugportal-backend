@@ -1,5 +1,5 @@
 export interface IIdTokens {
-  r_val: string;
-  id: string;
-  p_id: string;
+	rVal: string;
+	id: string;
+	pId: string;
 }

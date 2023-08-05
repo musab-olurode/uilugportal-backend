@@ -71,9 +71,9 @@ const API_RESPONSE_PAGE_SIZE = 25;
 
 const TEST_USER_SESSION_ID = 'placeholder';
 const TEST_USER_ID_TOKENS: IIdTokens = {
-	r_val: 'placeholder',
+	rVal: 'placeholder',
 	id: 'placeholder',
-	p_id: 'placeholder',
+	pId: 'placeholder',
 };
 
 const TEST_USER: IUser = {
@@ -109,11 +109,10 @@ const TEST_USER: IUser = {
 		relationship: 'Sister',
 	},
 	phoneNumber: '08000000000',
-	session: '2019/2020',
 	semester: {
 		number: '1',
+		session: '2019/2020',
 		type: 'First',
-		year: '2019',
 	},
 	signature: 'https://i.pravatar.cc/300',
 	sponsor: {
@@ -133,6 +132,17 @@ const TEST_USER: IUser = {
 		faculty: 'Communication & Information Sciences',
 		role: Role.TEST_USER,
 		level: '100',
+		levelAdviser: {
+			email: 'larry@email.com',
+			fullName: 'Larry Doe',
+			phoneNumber: '08000000000',
+		},
+		idTokens: TEST_USER_ID_TOKENS,
+		semester: {
+			number: '1',
+			session: '2019/2020',
+			type: 'First',
+		},
 	} as UserDoc,
 };
 

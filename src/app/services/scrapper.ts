@@ -103,9 +103,9 @@ class ScrapperService {
 
 	public static getProfileSummary(dashboard: string) {
 		const idTokens: IIdTokens = {
-			r_val: '',
+			rVal: '',
 			id: '',
-			p_id: '',
+			pId: '',
 		};
 		const profileTableValues: string[] = [];
 
@@ -120,17 +120,22 @@ class ScrapperService {
 			profileTableValues.push(...rowValues);
 		});
 		// eslint-disable-next-line quotes
-		const semester = $("[color='green']")
+		const semesterString = $("[color='green']")
 			.map((i, elem) => {
 				if (i === 3) return $(elem).text();
 			})
 			.toArray();
+		let semesterParts = semesterString[0].toString().split(' ');
 
-		idTokens.r_val = profileLink.split('&')[0].split('=')[1];
+		idTokens.rVal = profileLink.split('&')[0].split('=')[1];
 		idTokens.id = profileLink.split('&')[1].split('=')[1];
-		idTokens.p_id = passwordManagementLink.split('&')[1].split('=')[1];
+		idTokens.pId = passwordManagementLink.split('&')[1].split('=')[1];
 		const avatarUrl = `${unilorinPortalUrl}/${relativeAvatarUrl}`;
-		const session = semester[0].toString().split(' ')[3].trim();
+		const semester = {
+			type: semesterParts[0].trim(),
+			session: semesterString[0].toString().split(' ')[3].trim(),
+			number: semesterParts[1].replace(/\(|\)/g, '').trim().charAt(0),
+		};
 
 		const profileSummary: IStudentProfileSummary = {
 			avatar: avatarUrl,
@@ -140,112 +145,82 @@ class ScrapperService {
 			department: profileTableValues[4],
 			course: profileTableValues[5],
 			level: profileTableValues[6] as Level,
-			session,
+			levelAdviser: {
+				fullName: normalizeName(profileTableValues[8] || ''),
+				email: profileTableValues[9] || '',
+				phoneNumber: profileTableValues[10] || '',
+			},
+			semester,
 		};
 
 		return { idTokens, profile: profileSummary };
 	}
 
 	public static async getFullUserProfile(sessionId: string, user: UserDoc) {
-		const dashboardPage = await this.getDashboardPage(sessionId);
-		const idTokens = this.getProfileSummary(dashboardPage).idTokens;
-
-		if (user.idTokens.rVal != idTokens.r_val) {
-			user.idTokens.rVal = idTokens.r_val;
-		}
-		if (user.idTokens.pId != idTokens.p_id) {
-			user.idTokens.pId = idTokens.p_id;
-		}
-		if (user.idTokens.id != idTokens.id) {
-			user.idTokens.id = idTokens.id;
-		}
-		if (user.isModified()) {
-			await user.save();
-		}
-
 		const profilePage = await this.getPage(
-			`personal_details.php?r_val=${idTokens.r_val}&id=${idTokens.id}`,
+			`personal_details.php?r_val=${user.idTokens.rVal}&id=${user.idTokens.id}`,
 			sessionId,
 			RequestMethod.GET,
 			PageTitle.PERSONAL_DETAILS
 		);
 
 		const $profile = cheerio.load(profilePage);
-		const $dashboard = cheerio.load(dashboardPage);
-
-		let dashboardData = $dashboard('#content')
-			.find('td')
-			.map((i, el) => $dashboard(el).text())
-			.toArray();
 
 		let images = $profile('#content')
 			.find('img')
-			.map((i, el) => `${unilorinPortalUrl}/${$profile(el).attr('src')}`)
-			.toArray();
+			.map((i, el) => {
+				const imgSrc = $profile(el).attr('src')?.trim();
+				return imgSrc && imgSrc !== 'pictures/'
+					? `${unilorinPortalUrl}/${imgSrc}`
+					: '';
+			})
+			.toArray() as unknown as string[];
 
 		let profileData = $profile('#content')
 			.find('td')
-			.map((i, el) => $profile(el).text())
-			.toArray();
-
-		// eslint-disable-next-line quotes
-		let semester = $dashboard("[color='green']")
-			.map((i, elem) => {
-				if (i === 3) return $dashboard(elem).text();
-			})
-			.toArray();
-		let semesterParts = semester[0].toString().split(' ');
+			.map((i, el) => $profile(el).text().toString().trim())
+			.toArray() as unknown as string[];
 
 		let userProfile: IStudentProfile = {
-			avatar: images[1].toString().trim(),
-			signature: images[2].toString().trim(),
-			matricNumber: profileData[2].toString().trim(),
-			fullName: normalizeName(profileData[4].toString().trim()),
-			session: profileData[5].toString().trim(),
-			faculty: profileData[6].toString().trim(),
-			department: profileData[7].toString().trim(),
-			course: profileData[8].toString().trim(),
-			level:
-				(profileData[3].toString().trim() as IStudentProfile['level']) || '400',
-			gender: profileData[9].toString().trim(),
-			address: profileData[10].toString().trim(),
-			studentEmail: profileData[11].toString().trim(),
-			phoneNumber: profileData[12].toString().trim(),
-			modeOfEntry: profileData[13].toString().trim(),
-			studentShipStatus: profileData[14].toString().trim(),
-			chargesPaid: profileData[15].toString().trim(),
-			dateOfBirth: profileData[16].toString().trim(),
-			stateOfOrigin: profileData[17].toString().trim(),
-			lgaOfOrigin: profileData[18].toString().trim(),
-			levelAdviser: {
-				fullName: normalizeName(dashboardData[8]?.toString().trim() || ''),
-				email: dashboardData[9]?.toString().trim() || '',
-				phoneNumber: dashboardData[10]?.toString().trim() || '',
-			},
+			avatar: images[1],
+			signature: images[2],
+			matricNumber: profileData[2],
+			fullName: normalizeName(profileData[4]),
+			faculty: profileData[6],
+			department: profileData[7],
+			course: profileData[8],
+			level: (profileData[3] as IStudentProfile['level']) || '400',
+			gender: profileData[9],
+			address: profileData[10],
+			studentEmail: profileData[11],
+			phoneNumber: profileData[12],
+			modeOfEntry: profileData[13],
+			studentShipStatus: profileData[14],
+			chargesPaid: profileData[15],
+			dateOfBirth: profileData[16],
+			stateOfOrigin: profileData[17],
+			lgaOfOrigin: profileData[18],
+			levelAdviser: user.levelAdviser,
 			nextOfKin: {
-				fullName: normalizeName(profileData[21].toString().trim()),
-				address: profileData[22].toString().trim(),
-				relationship: profileData[23].toString().trim(),
-				phoneNumber: profileData[24].toString().trim(),
-				email: profileData[25].toString().trim(),
+				fullName: normalizeName(profileData[21]),
+				address: profileData[22],
+				relationship: profileData[23],
+				phoneNumber: profileData[24],
+				email: profileData[25],
 			},
 			guardian: {
-				name: normalizeName(profileData[27].toString().trim()),
-				address: profileData[28].toString().trim(),
-				phoneNumber: profileData[29].toString().trim(),
-				email: profileData[30].toString().trim(),
+				name: normalizeName(profileData[27]),
+				address: profileData[28],
+				phoneNumber: profileData[29],
+				email: profileData[30],
 			},
 			sponsor: {
-				fullName: normalizeName(profileData[32].toString().trim()),
-				address: profileData[33].toString().trim(),
-				phoneNumber: profileData[34].toString().trim(),
-				email: profileData[35].toString().trim(),
+				fullName: normalizeName(profileData[32]),
+				address: profileData[33],
+				phoneNumber: profileData[34],
+				email: profileData[35],
 			},
-			semester: {
-				type: semesterParts[0].trim(),
-				number: semesterParts[1].replace(/\(|\)/g, '').trim().charAt(0),
-				year: semesterParts[3].trim(),
-			},
+			semester: user.semester,
 		};
 
 		return userProfile;
@@ -357,7 +332,7 @@ class ScrapperService {
 		matricNumber: string
 	) {
 		const receiptsPage = await this.getPage(
-			`print_course_form.php?id=rec&r_val=${idTokens.r_val}`,
+			`print_course_form.php?id=rec&r_val=${idTokens.rVal}`,
 			sessionId,
 			RequestMethod.GET,
 			PageTitle.COURSE_FORM
@@ -632,17 +607,19 @@ class ScrapperService {
 		);
 		const profileTableValues: string[] = [];
 
-		let hrefValue: string | null = null;
-
-		$('a[href*=personal_details.php]').each((index, element) => {
-			const href = $(element).attr('href');
-			if (href) {
-				hrefValue = href;
-				return false; // Exit the loop early if we found a match
-			}
+		$('table tbody tr').each((index, row) => {
+			const cells = $(row).find('td');
+			const rowValues = cells.map((_, cell) => $(cell).text().trim()).get();
+			profileTableValues.push(...rowValues);
 		});
 
-		return { hrefValue };
+		const levelAdviser = {
+			fullName: normalizeName(profileTableValues[15] || ''),
+			email: profileTableValues[19] || '',
+			phoneNumber: profileTableValues[100] || '',
+		};
+
+		return { levelAdviser };
 	}
 }
 

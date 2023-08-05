@@ -46,6 +46,7 @@ class AuthService {
 			matricNumber,
 		});
 
+		// First time login
 		if (!user) {
 			const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
 			const { profile, idTokens } =
@@ -59,23 +60,21 @@ class AuthService {
 				department: profile.department,
 				level: profile.level,
 				role: Role.STUDENT,
-				idTokens: {
-					rVal: idTokens.r_val,
-					id: idTokens.id,
-					pId: idTokens.p_id,
-				},
+				levelAdviser: profile.levelAdviser,
+				semester: profile.semester,
+				idTokens,
 			});
 		}
 
+		// Existing users without new profile data
 		if (!user.idTokens.rVal) {
 			const dashboardPage = await ScrapperService.getDashboardPage(sessionId);
-			const { idTokens } = ScrapperService.getProfileSummary(dashboardPage);
+			const { idTokens, profile } =
+				ScrapperService.getProfileSummary(dashboardPage);
 
-			user.idTokens = {
-				rVal: idTokens.r_val,
-				id: idTokens.id,
-				pId: idTokens.p_id,
-			};
+			user.levelAdviser = profile.levelAdviser;
+			user.semester = profile.semester;
+			user.idTokens = idTokens;
 			await user!.save();
 		}
 

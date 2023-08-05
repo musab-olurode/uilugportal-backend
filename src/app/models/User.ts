@@ -36,6 +36,34 @@ const UserSchema = new Schema(
 			enum: [Role.STUDENT, Role.CLASS_REP, Role.ASST_CLASS_REP, Role.TEST_USER],
 			default: Role.STUDENT,
 		},
+		levelAdviser: {
+			fullName: {
+				type: String,
+				required: true,
+			},
+			email: {
+				type: String,
+				required: true,
+			},
+			phoneNumber: {
+				type: String,
+				required: true,
+			},
+		},
+		semester: {
+			type: {
+				type: String,
+				required: true,
+			},
+			session: {
+				type: String,
+				required: true,
+			},
+			number: {
+				type: String,
+				required: true,
+			},
+		},
 		idTokens: {
 			rVal: {
 				type: String,

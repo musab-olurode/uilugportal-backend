@@ -52,6 +52,8 @@ class AuthService {
 			const { profile, idTokens } =
 				ScrapperService.getProfileSummary(dashboardPage);
 
+			console.log("shouldn't be here----------------", user);
+
 			user = await User.create({
 				matricNumber: profile.matricNumber,
 				fullName: profile.fullName,

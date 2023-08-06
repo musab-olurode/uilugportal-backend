@@ -139,7 +139,7 @@ class ScrapperService {
 
 		const profileSummary: IStudentProfileSummary = {
 			avatar: avatarUrl,
-			matricNumber: profileTableValues[0],
+			matricNumber: profileTableValues[0].toUpperCase(),
 			fullName: normalizeName(profileTableValues[2]),
 			faculty: profileTableValues[3],
 			department: profileTableValues[4],
@@ -380,7 +380,8 @@ class ScrapperService {
 			paymentReceiptsWithPages.push(receipt);
 		}
 
-		let thisYear = new Date().getFullYear();
+		// subtract one to account for covid displacement
+		let thisYear = new Date().getFullYear() - 1;
 
 		let levelString = '';
 

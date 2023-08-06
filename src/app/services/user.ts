@@ -20,7 +20,8 @@ class UserService {
 	public static async calculateCGPA(sessionId: string, level: string) {
 		if (sessionId === TEST_USER_SESSION_ID) return 4.0;
 
-		let thisYear = new Date().getFullYear();
+		// subtract one to account for covid displacement
+		let thisYear = new Date().getFullYear() - 1;
 		let sessions = Number((level as string).charAt(0));
 
 		let allResults: IResult[] = [];

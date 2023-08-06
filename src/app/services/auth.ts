@@ -1,4 +1,3 @@
-import { Types } from 'mongoose';
 import { UserDoc } from '../../interfaces/UserDoc';
 import User from '../models/User';
 import ScrapperService from './scrapper';
@@ -43,7 +42,7 @@ class AuthService {
 		sessionId: string
 	) {
 		let user = await User.findOne({
-			matricNumber,
+			matricNumber: matricNumber.toUpperCase(),
 		});
 
 		// First time login

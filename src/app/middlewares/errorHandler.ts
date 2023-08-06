@@ -28,7 +28,7 @@ const errorHandler = (
 	!TESTING && console.log((err as any).stack);
 
 	if (err instanceof ApiError) {
-		ApiError.handle(err, res);
+		return ApiError.handle(err, res);
 	} else {
 		// Mongoose bad ObjectId
 		if (err.name === 'CastError') {
@@ -44,7 +44,7 @@ const errorHandler = (
 			field = field.substring(0, field.lastIndexOf('_')); // returns field
 			field = field.trim();
 			const message = `${field} already exists`;
-			ApiError.handle(new BadRequestError(message), res);
+			return ApiError.handle(new BadRequestError(message), res);
 		}
 
 		// Mongoose validation error
@@ -52,16 +52,19 @@ const errorHandler = (
 			const message = Object.values((err as any).errors)
 				.map((val: any): string => val.message)
 				.join(', ');
-			ApiError.handle(new BadRequestError(message), res);
+			return ApiError.handle(new BadRequestError(message), res);
 		}
 
 		if (error.message === 'Route Not found') {
-			ApiError.handle(new NotFoundError('requested resource not found'), res);
+			return ApiError.handle(
+				new NotFoundError('requested resource not found'),
+				res
+			);
 		}
 
 		// winston.error(err.stack);
 
-		ApiError.handle(new InternalError(), res);
+		return ApiError.handle(new InternalError(), res);
 	}
 };
 

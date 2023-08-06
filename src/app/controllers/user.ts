@@ -3,7 +3,6 @@ import { SuccessResponse } from '../../core/ApiResponse';
 import { getSessionsAsString } from '../helpers/constants';
 import asyncHandler from '../middlewares/async';
 import UserService from '../services/user';
-import { IIdTokens } from '../../interfaces/IdTokens';
 
 export const getResult = asyncHandler(async (req: Request, res: Response) => {
 	const sessionsAsString = getSessionsAsString();

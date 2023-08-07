@@ -41,7 +41,7 @@ export interface IStudentProfile extends IStudentProfileSummary {
 		email: string;
 	};
 	guardian: {
-		name: string;
+		fullName: string;
 		address: string;
 		phoneNumber: string;
 		email: string;

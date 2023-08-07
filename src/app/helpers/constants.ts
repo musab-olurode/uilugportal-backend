@@ -90,7 +90,7 @@ const TEST_USER: IUser = {
 	guardian: {
 		address: '11, Hikory Lane, Wakanda',
 		email: 'tom@email.com',
-		name: 'Tom Doe',
+		fullName: 'Tom Doe',
 		phoneNumber: '08000000000',
 	},
 	level: '100',

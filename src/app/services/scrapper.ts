@@ -209,7 +209,7 @@ class ScrapperService {
 				email: profileData[25],
 			},
 			guardian: {
-				name: normalizeName(profileData[27]),
+				fullName: normalizeName(profileData[27]),
 				address: profileData[28],
 				phoneNumber: profileData[29],
 				email: profileData[30],

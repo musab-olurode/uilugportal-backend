@@ -39,15 +39,15 @@ const UserSchema = new Schema(
 		levelAdviser: {
 			fullName: {
 				type: String,
-				required: true,
+				default: '',
 			},
 			email: {
 				type: String,
-				required: true,
+				default: '',
 			},
 			phoneNumber: {
 				type: String,
-				required: true,
+				default: '',
 			},
 		},
 		semester: {
